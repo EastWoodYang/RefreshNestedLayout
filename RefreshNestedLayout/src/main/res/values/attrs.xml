@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RefreshNestedLayout">
+
+        <!-- Mode of Pull-to-Refresh that should be used -->
+        <attr name="mode">
+            <flag name="both" value="0x0"/>
+            <flag name="pullToRefresh" value="0x1"/>
+            <flag name="autoLoad" value="0x2"/>
+            <flag name="disable" value="0x3"/>
+        </attr>
+
+        <attr name="pullMaxDistance" format="dimension"/>
+
+        <attr name="refreshingDistance" format="dimension"/>
+
+        <attr name="disableDivider" format="boolean"/>
+        <attr name="dividerHeight" format="dimension"/>
+        <attr name="dividerColor" format="reference|color"/>
+
+        <attr name="disableScrollWhenRefreshing" format="boolean"/>
+
+        <attr name="emptyLayout" format="reference"/>
+        <attr name="loadingLayout" format="reference"/>
+
+    </declare-styleable>
+
+</resources>

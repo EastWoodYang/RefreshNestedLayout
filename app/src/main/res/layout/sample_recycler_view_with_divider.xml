@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.ycdyng.refreshnestedlayout.RefreshNestedRecyclerViewLayout
+        xmlns:rll="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/refresh_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        rll:disableDivider="false"
+        rll:dividerColor="@color/colorPrimary"
+        rll:dividerHeight="1dp"
+        rll:mode="autoLoad">
+
+    </com.ycdyng.refreshnestedlayout.RefreshNestedRecyclerViewLayout>
+
+</LinearLayout>

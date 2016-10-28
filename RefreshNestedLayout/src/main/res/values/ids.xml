@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <item name="empty_layout" type="id"/>
+    <item name="loading_layout" type="id"/>
+    <item name="refreshable_layout" type="id"/>
+    <item name="header_layout" type="id"/>
+
+</resources>
