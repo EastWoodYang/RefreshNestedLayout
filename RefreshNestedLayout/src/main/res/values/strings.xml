@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">RefreshNestedLayout</string>
+    <string name="load_failure">AUTO-LOAD FAILURE, CLICK TO RETRY</string>
+    <string name="load_end">NO MORE DATA</string>
+    <string name="load_more">CLICK TO LOAD MORE</string>
+    <string name="no_data">NO DATA</string>
+
+
 </resources>

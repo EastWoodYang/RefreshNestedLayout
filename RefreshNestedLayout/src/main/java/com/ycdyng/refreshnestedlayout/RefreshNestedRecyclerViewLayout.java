@@ -38,6 +38,11 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
     private int mDividerHeight;
     private int mDividerColor;
 
+    private int mAutoLoadResId;
+    private int mClickableResId;
+    private int mLoadEndResId;
+    private int mLoadErrorResId;
+
     public RefreshNestedRecyclerViewLayout(Context context) {
         super(context);
     }
@@ -75,6 +80,11 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
         mDisableDivider = a.getBoolean(R.styleable.RefreshNestedLayout_disableDivider, true);
         mDividerHeight = a.getDimensionPixelOffset(R.styleable.RefreshNestedLayout_dividerHeight, getResources().getDimensionPixelOffset(R.dimen.default_divider_height));
         mDividerColor = a.getColor(R.styleable.RefreshNestedLayout_dividerColor, getResources().getColor(R.color.default_divider_color));
+
+        mAutoLoadResId = a.getResourceId(R.styleable.RefreshNestedLayout_autoLoadLayout, R.layout.default_footer_loading_layout);
+        mClickableResId = a.getResourceId(R.styleable.RefreshNestedLayout_clickableLayout, R.layout.default_footer_clickable_layout);
+        mLoadEndResId = a.getResourceId(R.styleable.RefreshNestedLayout_loadEndLayout, R.layout.default_footer_end_layout);
+        mLoadErrorResId = a.getResourceId(R.styleable.RefreshNestedLayout_loadErrorLayout, R.layout.default_footer_error_layout);
     }
 
     private RefreshRecyclerView createRecyclerView(Context context, AttributeSet attrs) {
@@ -153,6 +163,10 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
         if (adapter instanceof WrapRecyclerAdapter) {
             mWrapRecyclerAdapter = (WrapRecyclerAdapter) adapter;
             mWrapRecyclerAdapter.setOnLastItemClickListener(mLastItemOnClickListener);
+            mWrapRecyclerAdapter.setAutoLoadResId(mAutoLoadResId);
+            mWrapRecyclerAdapter.setClickableResId(mClickableResId);
+            mWrapRecyclerAdapter.setLoadEndResId(mLoadEndResId);
+            mWrapRecyclerAdapter.setLoadErrorResId(mLoadErrorResId);
             mRefreshableView.setAdapter(mWrapRecyclerAdapter);
         } else {
             throw new IllegalArgumentException("RecyclerView.Adapter must be extends WrapRecyclerAdapter");

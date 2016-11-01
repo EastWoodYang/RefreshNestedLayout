@@ -6,8 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ycdyng.refreshnestedlayout.R;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +27,13 @@ public class WrapRecyclerAdapter<T extends RecyclerView.Adapter> extends Recycle
 
     protected boolean loading;
 
-    protected int autoLoadViewResId;
+    protected int autoLoadResId;
 
-    protected int clickableViewResId;
+    protected int clickableResId;
 
-    protected int endViewResId;
+    protected int loadEndResId;
 
-    protected int errorViewResId;
+    protected int loadErrorResId;
 
     private View.OnClickListener mOnLastItemClickListener;
 
@@ -236,30 +234,14 @@ public class WrapRecyclerAdapter<T extends RecyclerView.Adapter> extends Recycle
     private RecyclerView.ViewHolder createAutoLoadViewHolder(ViewGroup viewGroup) {
         View lastItemView = null;
         if (loadError) {
-            if (errorViewResId != 0) {
-                lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(errorViewResId, viewGroup, false);
-            } else {
-                lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.default_footer_error_layout, viewGroup, false);
-            }
+            lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(loadErrorResId, viewGroup, false);
         } else if (loadEnd) {
-            if (endViewResId != 0) {
-                lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(endViewResId, viewGroup, false);
-            } else {
-                lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.default_footer_end_layout, viewGroup, false);
-            }
+            lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(loadEndResId, viewGroup, false);
         } else {
             if (autoLoad || loading) {
-                if (autoLoadViewResId != 0) {
-                    lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(autoLoadViewResId, viewGroup, false);
-                } else {
-                    lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.default_footer_loading_layout, viewGroup, false);
-                }
+                lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(autoLoadResId, viewGroup, false);
             } else {
-                if (clickableViewResId != 0) {
-                    lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(clickableViewResId, viewGroup, false);
-                } else {
-                    lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.default_footer_clickable_layout, viewGroup, false);
-                }
+                lastItemView = LayoutInflater.from(viewGroup.getContext()).inflate(clickableResId, viewGroup, false);
             }
         }
         return new RecyclerView.ViewHolder(lastItemView) {
@@ -308,36 +290,36 @@ public class WrapRecyclerAdapter<T extends RecyclerView.Adapter> extends Recycle
         this.loading = loading;
     }
 
-    public void setAutoLoadViewResId(int resId) {
-        this.autoLoadViewResId = resId;
+    public void setAutoLoadResId(int resId) {
+        this.autoLoadResId = resId;
     }
 
-    public int getAutoLoadViewResId() {
-        return autoLoadViewResId;
+    public int getAutoLoadResId() {
+        return autoLoadResId;
     }
 
-    public void setClickableViewResId(int resId) {
-        this.clickableViewResId = resId;
+    public void setClickableResId(int resId) {
+        this.clickableResId = resId;
     }
 
-    public int getClickableViewResId() {
-        return clickableViewResId;
+    public int getClickableResId() {
+        return clickableResId;
     }
 
-    public int getEndViewResId() {
-        return endViewResId;
+    public int getLoadEndResId() {
+        return loadEndResId;
     }
 
-    public void setEndViewResId(int endViewResId) {
-        this.endViewResId = endViewResId;
+    public void setLoadEndResId(int loadEndResId) {
+        this.loadEndResId = loadEndResId;
     }
 
-    public int getErrorViewResId() {
-        return errorViewResId;
+    public int getLoadErrorResId() {
+        return loadErrorResId;
     }
 
-    public void setErrorViewResId(int errorViewResId) {
-        this.errorViewResId = errorViewResId;
+    public void setLoadErrorResId(int loadErrorResId) {
+        this.loadErrorResId = loadErrorResId;
     }
 
     public void setOnLastItemClickListener(View.OnClickListener listener) {

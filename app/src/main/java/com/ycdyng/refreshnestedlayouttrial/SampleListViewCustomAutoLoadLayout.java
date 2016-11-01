@@ -53,7 +53,7 @@ public class SampleListViewCustomAutoLoadLayout extends AppCompatActivity {
                 helper.setText(R.id.textView1, item.getValues());
             }
         };
-        mQuickAdapter.setAutoLoadViewResId(R.layout.loading_layout);
+        mQuickAdapter.setAutoLoadResId(R.layout.loading_layout);
         mQuickAdapter.addAll(mDataList);
 
         mRefresher.setAdapter(mQuickAdapter);

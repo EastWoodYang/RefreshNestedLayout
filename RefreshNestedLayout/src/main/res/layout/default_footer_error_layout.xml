@@ -12,6 +12,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="AUTO-LOAD FAILURE, CLICK TO RETRY"/>
+        android:text="@string/load_failure"/>
 
 </LinearLayout>

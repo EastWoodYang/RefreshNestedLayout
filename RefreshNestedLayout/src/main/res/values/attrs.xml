@@ -23,6 +23,11 @@
         <attr name="emptyLayout" format="reference"/>
         <attr name="loadingLayout" format="reference"/>
 
+        <attr name="autoLoadLayout" format="reference"/>
+        <attr name="clickableLayout" format="reference"/>
+        <attr name="loadEndLayout" format="reference"/>
+        <attr name="loadErrorLayout" format="reference"/>
+
     </declare-styleable>
 
 </resources>

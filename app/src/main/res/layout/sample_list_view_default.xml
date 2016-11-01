@@ -11,8 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:emptyLayout="@layout/custom_body_empty_layout"
-        app:loadingLayout="@layout/custom_body_loading_layout" >
+        app:emptyLayout="@layout/custom_body_empty_layout" >
 
         <!--<com.ycdyng.refreshnestedlayout.kernel.RefreshLoadingLayout-->
             <!--android:id="@+id/loading_layout"-->

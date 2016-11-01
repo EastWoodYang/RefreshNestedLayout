@@ -48,7 +48,7 @@ public class SampleRecyclerViewCustomAutoLoadLayout extends AppCompatActivity {
 
         mSimpleAdapter = new SampleRecyclerAdapter(this, mDataList);
         mQuickAdapter = new WrapRecyclerAdapter<SampleRecyclerAdapter>(mSimpleAdapter);
-        mQuickAdapter.setAutoLoadViewResId(R.layout.loading_layout);
+        mQuickAdapter.setAutoLoadResId(R.layout.loading_layout);
 
         mRefresher.setAdapter(mQuickAdapter);
         mRefresher.setOnAutoLoadListener(new RefreshNestedLayout.OnAutoLoadListener() {

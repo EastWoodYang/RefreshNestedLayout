@@ -48,7 +48,7 @@ public class SampleListViewWithWrapAdapter extends AppCompatActivity {
 
         mSampleAdapter = new SampleAdapter(this, mDataList);
         mWrapAdapter = new WrapAdapter<SampleAdapter>(mSampleAdapter);
-        mWrapAdapter.setAutoLoadViewResId(R.layout.loading_layout);
+        mWrapAdapter.setAutoLoadResId(R.layout.loading_layout);
 
         mRefresher.setAdapter(mWrapAdapter);
         mRefresher.setOnAutoLoadListener(new RefreshNestedLayout.OnAutoLoadListener() {

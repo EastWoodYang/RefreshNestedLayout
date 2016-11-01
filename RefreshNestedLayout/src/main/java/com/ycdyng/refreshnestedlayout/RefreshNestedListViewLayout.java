@@ -17,6 +17,7 @@
 package com.ycdyng.refreshnestedlayout;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AbsListView;
@@ -36,6 +37,11 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
     private AutoAdapter mAutoAdapter;
     private RefreshNestedLayout.OnAutoLoadListener mOnAutoLoadListener;
     private OnScrollListener mOriginalScrollListener;
+
+    private int mAutoLoadResId;
+    private int mClickableResId;
+    private int mLoadEndResId;
+    private int mLoadErrorResId;
 
     public RefreshNestedListViewLayout(Context context) {
         super(context);
@@ -66,6 +72,15 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
             refreshHeaderLayout.setHeight(0);  // hidden
         }
         return refreshHeaderLayout;
+    }
+
+    @Override
+    protected void handleStyledAttributes(TypedArray a) {
+        super.handleStyledAttributes(a);
+        mAutoLoadResId = a.getResourceId(R.styleable.RefreshNestedLayout_autoLoadLayout, R.layout.default_footer_loading_layout);
+        mClickableResId = a.getResourceId(R.styleable.RefreshNestedLayout_clickableLayout, R.layout.default_footer_clickable_layout);
+        mLoadEndResId = a.getResourceId(R.styleable.RefreshNestedLayout_loadEndLayout, R.layout.default_footer_end_layout);
+        mLoadErrorResId = a.getResourceId(R.styleable.RefreshNestedLayout_loadErrorLayout, R.layout.default_footer_error_layout);
     }
 
     protected RefreshListView createListView(Context context, AttributeSet attrs) {
@@ -118,6 +133,10 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
         if (baseAdapter instanceof AutoAdapter) {
             mAutoAdapter = (AutoAdapter) baseAdapter;
             mAutoAdapter.setOnLastItemClickListener(mLastItemOnClickListener);
+            mAutoAdapter.setAutoLoadResId(mAutoLoadResId);
+            mAutoAdapter.setClickableResId(mClickableResId);
+            mAutoAdapter.setLoadEndResId(mLoadEndResId);
+            mAutoAdapter.setLoadErrorResId(mLoadErrorResId);
             mRefreshableView.setAdapter(mAutoAdapter);
         } else {
             throw new IllegalArgumentException("Adapter must be extends QuickAdapter or WrapAdapter");

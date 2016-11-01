@@ -21,8 +21,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-import com.ycdyng.refreshnestedlayout.R;
-
 public abstract class AutoAdapter extends BaseAdapter {
 
     protected boolean autoLoadUsable;
@@ -35,44 +33,28 @@ public abstract class AutoAdapter extends BaseAdapter {
 
     protected boolean loading;
 
-    protected int autoLoadViewResId;
+    protected int autoLoadResId;
 
-    protected int clickableViewResId;
+    protected int clickableResId;
 
-    protected int endViewResId;
+    protected int loadEndResId;
 
-    protected int errorViewResId;
+    protected int loadErrorResId;
 
     protected View.OnClickListener mOnLastItemClickListener;
 
     protected View createAutoLoadView(View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         if (loadError) {
-            if (errorViewResId != 0) {
-                convertView = layoutInflater.inflate(errorViewResId, parent, false);
-            } else {
-                convertView = layoutInflater.inflate(R.layout.default_footer_error_layout, parent, false);
-            }
+            convertView = layoutInflater.inflate(loadErrorResId, parent, false);
             convertView.setOnClickListener(mOnLastItemClickListener);
         } else if (loadEnd) {
-            if (endViewResId != 0) {
-                convertView = layoutInflater.inflate(endViewResId, parent, false);
-            } else {
-                convertView = layoutInflater.inflate(R.layout.default_footer_end_layout, parent, false);
-            }
+            convertView = layoutInflater.inflate(loadEndResId, parent, false);
         } else {
             if (autoLoad || loading) {
-                if (autoLoadViewResId != 0) {
-                    convertView = layoutInflater.inflate(autoLoadViewResId, parent, false);
-                } else {
-                    convertView = layoutInflater.inflate(R.layout.default_footer_loading_layout, parent, false);
-                }
+                convertView = layoutInflater.inflate(autoLoadResId, parent, false);
             } else {
-                if (clickableViewResId != 0) {
-                    convertView = layoutInflater.inflate(clickableViewResId, parent, false);
-                } else {
-                    convertView = layoutInflater.inflate(R.layout.default_footer_clickable_layout, parent, false);
-                }
+                convertView = layoutInflater.inflate(clickableResId, parent, false);
                 convertView.setOnClickListener(mOnLastItemClickListener);
             }
         }
@@ -121,36 +103,36 @@ public abstract class AutoAdapter extends BaseAdapter {
         this.loading = loading;
     }
 
-    public void setAutoLoadViewResId(int resId) {
-        this.autoLoadViewResId = resId;
+    public void setAutoLoadResId(int resId) {
+        this.autoLoadResId = resId;
     }
 
-    public int getAutoLoadViewResId() {
-        return autoLoadViewResId;
+    public int getAutoLoadResId() {
+        return autoLoadResId;
     }
 
-    public void setClickableViewResId(int resId) {
-        this.clickableViewResId = resId;
+    public void setClickableResId(int resId) {
+        this.clickableResId = resId;
     }
 
-    public int getClickableViewResId() {
-        return clickableViewResId;
+    public int getClickableResId() {
+        return clickableResId;
     }
 
-    public int getEndViewResId() {
-        return endViewResId;
+    public int getLoadEndResId() {
+        return loadEndResId;
     }
 
-    public void setEndViewResId(int endViewResId) {
-        this.endViewResId = endViewResId;
+    public void setLoadEndResId(int loadEndResId) {
+        this.loadEndResId = loadEndResId;
     }
 
-    public int getErrorViewResId() {
-        return errorViewResId;
+    public int getLoadErrorResId() {
+        return loadErrorResId;
     }
 
-    public void setErrorViewResId(int errorViewResId) {
-        this.errorViewResId = errorViewResId;
+    public void setLoadErrorResId(int loadErrorResId) {
+        this.loadErrorResId = loadErrorResId;
     }
 
     public void setOnLastItemClickListener(View.OnClickListener listener) {
