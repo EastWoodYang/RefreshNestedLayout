@@ -23,10 +23,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
-import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.custom.DefaultHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RecycleViewDivider;
+import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
+import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshRecyclerView;
 import com.ycdyng.refreshnestedlayout.widget.adapter.WrapRecyclerAdapter;
 
@@ -89,7 +89,7 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
 
     private RefreshRecyclerView createRecyclerView(Context context, AttributeSet attrs) {
         RefreshRecyclerView internalRecyclerView = null;
-        View refreshableView = findViewById(R.id.refreshable_layout);
+        View refreshableView = findViewById(R.id.refreshable_view);
         if (refreshableView == null) {
             internalRecyclerView = new RefreshRecyclerView(context, attrs);
         } else {
@@ -115,15 +115,18 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
                         int visibleItemCount = linearLayoutManager.getChildCount();
                         int totalItemCount = linearLayoutManager.getItemCount();
                         int firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
-                        if ((visibleItemCount + firstVisibleItem) >= totalItemCount && (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING ||
-                                mCurrentState == State.LOADING_END || mCurrentState == State.LOADING_ERROR || mCurrentState == State.SCROLL_TO_REFRESH)) {
-                            if (mCurrentState == State.LOADING_END) {
-                                // do nothing...
-                            } else if (mCurrentState == State.LOADING_ERROR) {
-                                // do nothing...
-                            } else {
-                                setState(State.AUTO_LOADING);
-                                mOnAutoLoadListener.onLoading();
+                        if ((visibleItemCount + firstVisibleItem) >= totalItemCount &&
+                                (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING ||
+                                        mCurrentState == State.LOADING_END || mCurrentState == State.LOADING_ERROR || mCurrentState == State.SCROLL_TO_REFRESH)) {
+                            if (getAutoLoadUsable()) {
+                                if (mCurrentState == State.LOADING_END) {
+                                    // do nothing...
+                                } else if (mCurrentState == State.LOADING_ERROR) {
+                                    // do nothing...
+                                } else {
+                                    setState(State.AUTO_LOADING);
+                                    mOnAutoLoadListener.onLoading();
+                                }
                             }
                         }
                     } else {
@@ -172,7 +175,6 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
             throw new IllegalArgumentException("RecyclerView.Adapter must be extends WrapRecyclerAdapter");
         }
     }
-
 
     public boolean getAutoLoadUsable() {
         return mWrapRecyclerAdapter.getAutoLoadUsable();
@@ -245,13 +247,15 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
 
     @Override
     protected void checkBody() {
-        if (showEmpty && mWrapRecyclerAdapter.getItemCount() > 0 && !mWrapRecyclerAdapter.getAutoLoadUsable()) {
-            mRefreshableView.setVisibility(GONE);
-            mEmptyLayout.setVisibility(VISIBLE);
+        if (showEmpty && mWrapRecyclerAdapter.getItemCount() == 0 && !mWrapRecyclerAdapter.getAutoLoadUsable()) {
+            crossFading(mEmptyLayout, mRefreshableView);
         } else {
-            mRefreshableView.setVisibility(VISIBLE);
-            mEmptyLayout.setVisibility(GONE);
+            crossFading(mRefreshableView, mEmptyLayout);
         }
+    }
+
+    public void onAutoLoadingComplete() {
+        onAutoLoadingComplete(true);
     }
 
     @Override

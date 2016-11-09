@@ -16,8 +16,11 @@
 
 package com.ycdyng.refreshnestedlayout.kernel;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.MotionEventCompat;
@@ -38,6 +41,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.ycdyng.refreshnestedlayout.R;
 
@@ -50,7 +54,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     public static final int SMOOTH_SCROLL_DURATION_MS = 250;
 
-    private static final String STATE_STATE = "ptr_state";
+    //private static final String STATE_STATE = "ptr_state";
     private static final String STATE_MODE = "ptr_mode";
     private static final String STATE_ABLE = "ptr_abel";
     private static final String STATE_SUPER = "ptr_super";
@@ -97,7 +101,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     protected RefreshLoadingLayout mLoadingLayout;
     protected RefreshEmptyLayout mEmptyLayout;
 
-    protected boolean showEmpty;
+    protected boolean showEmpty = true;
 
     private SmoothScrollRunnable mCurrentSmoothScrollRunnable;
     private Interpolator mScrollAnimationInterpolator;
@@ -412,6 +416,10 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         return mCurrentState == State.AUTO_LOADING;
     }
 
+    public boolean isLoading() {
+        return mCurrentState == State.LOADING_DATA;
+    }
+
     public final boolean isManualScrolling() {
         return mCurrentState == State.MANUAL_SCROLLING;
     }
@@ -433,6 +441,10 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     public T getRefreshableView() {
         return mRefreshableView;
+    }
+
+    public View getEmptyLayout() {
+        return mEmptyLayout;
     }
 
     protected int getPullToRefreshScrollDuration() {
@@ -638,6 +650,14 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         return refreshLoadingLayout;
     }
 
+    public boolean isShowEmpty() {
+        return showEmpty;
+    }
+
+    public void setShowEmpty(boolean showEmpty) {
+        this.showEmpty = showEmpty;
+    }
+
     public void setEmptyLayoutResId(int resId) {
         View emptyView = LayoutInflater.from(mContext).inflate(resId, null);
         setEmptyView(emptyView);
@@ -646,6 +666,22 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     public void setEmptyView(View emptyView) {
         mEmptyLayout.removeAllViews();
         mEmptyLayout.addView(emptyView);
+    }
+
+    public void setEmptyContent(int resId) {
+        String content = mContext.getResources().getText(resId).toString();
+        setEmptyContent(content);
+    }
+
+    public void setEmptyContent(String content) {
+        if(mEmptyLayout == null) {
+            return;
+        }
+        View contentView = mEmptyLayout.findViewById(R.id.content_text_view);
+        if(contentView instanceof TextView) {
+            TextView contentTextView = (TextView) contentView;
+            contentTextView.setText(content);
+        }
     }
 
     public void setLoadingLayoutResId(int resId) {
@@ -698,7 +734,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     protected void onRestoreInstanceState(Parcelable state) {
         if (state instanceof Bundle) {
             Bundle bundle = (Bundle) state;
-            mCurrentState = State.mapIntToValue(bundle.getInt(STATE_STATE));
+            //mCurrentState = State.mapIntToValue(bundle.getInt(STATE_STATE));
             mMode = Mode.mapIntToValue(bundle.getInt(STATE_MODE));
             mIsDisable = bundle.getBoolean(STATE_ABLE);
             super.onRestoreInstanceState(bundle.getParcelable(STATE_SUPER));
@@ -714,7 +750,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     @Override
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
-        bundle.putInt(STATE_STATE, mCurrentState.getIntValue());
+        //bundle.putInt(STATE_STATE, mCurrentState.getIntValue());
         bundle.putInt(STATE_MODE, mMode.getIntValue());
         bundle.putBoolean(STATE_ABLE, mIsDisable);
         bundle.putParcelable(STATE_SUPER, super.onSaveInstanceState());
@@ -882,33 +918,58 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     public void onLoadingDataStart() {
         mCurrentState = State.LOADING_DATA;
         mRefreshableView.setVisibility(GONE);
-        mLoadingLayout.setVisibility(VISIBLE);
         mEmptyLayout.setVisibility(GONE);
+        if(Build.VERSION.SDK_INT >= 12) {
+            mLoadingLayout.setAlpha(1f);
+        }
+        mLoadingLayout.setVisibility(VISIBLE);
     }
 
     public void onLoadingDataComplete() {
         mCurrentState = State.RESET;
-        mRefreshableView.setVisibility(VISIBLE);
-        mLoadingLayout.setVisibility(GONE);
-        mEmptyLayout.setVisibility(GONE);
+        crossFading(mRefreshableView, mLoadingLayout);
         checkBody();
+    }
+
+    public void showEmptyLayout() {
+        crossFading(mEmptyLayout, mRefreshableView);
     }
 
     protected abstract void checkBody();
 
-    public boolean isShowEmpty() {
-        return showEmpty;
-    }
+    protected void crossFading(View contentView, final View loadingView) {
+        if(Build.VERSION.SDK_INT >= 12) {
+            if(contentView.getVisibility() == VISIBLE) {
+                loadingView.setVisibility(GONE);
+                return;
+            }
+            contentView.setAlpha(0f);
+            contentView.setVisibility(VISIBLE);
+            contentView.animate()
+                    .alpha(1f)
+                    .setDuration(400)
+                    .setListener(null);
 
-    public void setShowEmpty(boolean showEmpty) {
-        this.showEmpty = showEmpty;
+            loadingView.animate()
+                    .alpha(0f)
+                    .setDuration(400)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            loadingView.setVisibility(GONE);
+                        }
+                    });
+        } else {
+            contentView.setVisibility(VISIBLE);
+            loadingView.setVisibility(GONE);
+        }
     }
 
     // NestedScrollingParent
 
     @Override
     public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
-        return isEnabled() && !mReturningToStart && !isRefreshing() && (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
+        return isEnabled() && !mIsDisable && !mReturningToStart && !isRefreshing() && (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
     }
 
     @Override

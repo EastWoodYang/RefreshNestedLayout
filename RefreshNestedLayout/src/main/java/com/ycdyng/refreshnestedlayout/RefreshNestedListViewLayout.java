@@ -26,10 +26,10 @@ import android.widget.Adapter;
 import android.widget.BaseAdapter;
 import android.widget.HeaderViewListAdapter;
 
-import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
-import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.custom.DefaultHeaderLayout;
+import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshListView;
+import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.widget.adapter.AutoAdapter;
 
 public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshListView> {
@@ -85,7 +85,7 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
 
     protected RefreshListView createListView(Context context, AttributeSet attrs) {
         RefreshListView internalListView = null;
-        View refreshableView = findViewById(R.id.refreshable_layout);
+        View refreshableView = findViewById(R.id.refreshable_view);
         if (refreshableView == null) {
             internalListView = new RefreshListView(context, attrs);
         } else {
@@ -109,8 +109,8 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
                     mOriginalScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
                 }
                 if ((firstVisibleItem + visibleItemCount >= totalItemCount) &&
-                        (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.LOADING_ERROR ||
-                                mCurrentState == State.LOADING_END || mCurrentState == State.SCROLL_TO_REFRESH)) {
+                        (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING ||
+                                mCurrentState == State.LOADING_ERROR || mCurrentState == State.LOADING_END || mCurrentState == State.SCROLL_TO_REFRESH)) {
                     if (mOnAutoLoadListener != null && getAutoLoadUsable()) {
                         if (isAutoLoad()) {
                             if (mCurrentState == State.LOADING_END) {
@@ -232,12 +232,14 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
     @Override
     protected void checkBody() {
         if (showEmpty && mAutoAdapter.isEmpty() && !mAutoAdapter.getAutoLoadUsable()) {
-            mRefreshableView.setVisibility(GONE);
-            mEmptyLayout.setVisibility(VISIBLE);
+            crossFading(mEmptyLayout, mRefreshableView);
         } else {
-            mRefreshableView.setVisibility(VISIBLE);
-            mEmptyLayout.setVisibility(GONE);
+            crossFading(mRefreshableView, mEmptyLayout);
         }
+    }
+
+    public void onAutoLoadingComplete() {
+        onAutoLoadingComplete(true);
     }
 
     @Override

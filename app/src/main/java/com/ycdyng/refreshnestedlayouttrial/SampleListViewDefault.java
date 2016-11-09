@@ -50,7 +50,7 @@ public class SampleListViewDefault extends AppCompatActivity {
         };
 
         mRefresher.setAdapter(mQuickAdapter);
-        mRefresher.setShowEmpty(true);
+        mRefresher.setEmptyContent("为空");
         mRefresher.setOnRefreshListener(new RefreshNestedLayout.OnRefreshListener() {
 
             @Override

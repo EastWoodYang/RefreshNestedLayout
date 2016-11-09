@@ -21,9 +21,9 @@ import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.ycdyng.refreshnestedlayout.custom.DefaultHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
-import com.ycdyng.refreshnestedlayout.custom.DefaultHeaderLayout;
 
 public class RefreshNestedScrollViewLayout extends RefreshNestedLayout<NestedScrollView> {
 
@@ -61,7 +61,7 @@ public class RefreshNestedScrollViewLayout extends RefreshNestedLayout<NestedScr
 
     protected NestedScrollView createScrollView(Context context, AttributeSet attrs) {
         NestedScrollView internalScrollView = null;
-        View refreshableView = findViewById(R.id.refreshable_layout);
+        View refreshableView = findViewById(R.id.refreshable_view);
         if (refreshableView == null) {
             internalScrollView = new NestedScrollView(context, attrs);
         } else {

@@ -5,8 +5,8 @@
     android:layout_height="match_parent">
 
     <ProgressBar
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_gravity="center"
         android:indeterminate="true"
         android:indeterminateBehavior="repeat"

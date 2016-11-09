@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="RefreshNestedLayout">
-
-        <!-- Mode of Pull-to-Refresh that should be used -->
         <attr name="mode">
             <flag name="both" value="0x0"/>
             <flag name="pullToRefresh" value="0x1"/>
@@ -27,7 +25,5 @@
         <attr name="clickableLayout" format="reference"/>
         <attr name="loadEndLayout" format="reference"/>
         <attr name="loadErrorLayout" format="reference"/>
-
     </declare-styleable>
-
 </resources>
