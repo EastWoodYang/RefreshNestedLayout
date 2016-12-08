@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="default_pull_max_distance">106dp</dimen>
-    <dimen name="default_refreshing_distance">32dp</dimen>
+    <dimen name="default_refreshing_distance">42dp</dimen>
     <dimen name="default_divider_height">0.5dp</dimen>
 </resources>

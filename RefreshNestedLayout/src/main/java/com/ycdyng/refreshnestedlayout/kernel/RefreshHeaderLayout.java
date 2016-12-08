@@ -26,8 +26,7 @@ import com.ycdyng.refreshnestedlayout.R;
 public abstract class RefreshHeaderLayout extends FrameLayout implements RefreshHeaderHelper {
 
     public RefreshHeaderLayout(Context context) {
-        super(context);
-        init(context, null);
+        this(context, null);
     }
 
     public RefreshHeaderLayout(Context context, AttributeSet attrs) {

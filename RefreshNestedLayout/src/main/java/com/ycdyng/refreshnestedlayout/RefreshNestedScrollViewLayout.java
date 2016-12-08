@@ -79,4 +79,8 @@ public class RefreshNestedScrollViewLayout extends RefreshNestedLayout<NestedScr
 
     }
 
+    public void onRefreshComplete() {
+        onRefreshComplete(true);
+    }
+	
 }

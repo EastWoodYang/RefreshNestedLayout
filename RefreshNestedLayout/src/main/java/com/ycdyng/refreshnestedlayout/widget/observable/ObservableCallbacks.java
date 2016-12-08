@@ -1,8 +1,5 @@
 package com.ycdyng.refreshnestedlayout.widget.observable;
 
-/**
- * Created by YcdYng on 8/23/2016.
- */
 public interface ObservableCallbacks {
     /**
      * Called when the scroll change events occurred.

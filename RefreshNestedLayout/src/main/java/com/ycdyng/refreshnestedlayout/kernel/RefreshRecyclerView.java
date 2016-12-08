@@ -55,18 +55,11 @@ public class RefreshRecyclerView extends ObservableRecyclerView {
                 Adapter adapter = mRecyclerView.getAdapter();
                 if (adapter instanceof WrapRecyclerAdapter) {
                     WrapRecyclerAdapter baseRecyclerAdapter = (WrapRecyclerAdapter) adapter;
-                    int headerCount = baseRecyclerAdapter.getHeaderCount();
-                    if (position >= headerCount) {
+                    int itemViewType = baseRecyclerAdapter.getItemViewType(position);
+                    if(itemViewType >= 0) {
+                        int headerCount = baseRecyclerAdapter.getHeaderCount();
                         position -= headerCount;
                         mOnItemClickListener.onItemClicked(mRecyclerView, position, v);
-                    } else {
-                        View headerView = baseRecyclerAdapter.getHeader(position);
-                        if (headerView instanceof BaseRecyclerHeaderFooterView) {
-                            BaseRecyclerHeaderFooterView baseRecyclerHeaderFooterView = (BaseRecyclerHeaderFooterView) headerView;
-                            if (baseRecyclerHeaderFooterView.getOnClickListener() != null) {
-                                baseRecyclerHeaderFooterView.getOnClickListener().onClick(headerView);
-                            }
-                        }
                     }
                 } else {
                     mOnItemClickListener.onItemClicked(mRecyclerView, position, v);
@@ -83,15 +76,11 @@ public class RefreshRecyclerView extends ObservableRecyclerView {
                 Adapter adapter = mRecyclerView.getAdapter();
                 if (adapter instanceof WrapRecyclerAdapter) {
                     WrapRecyclerAdapter baseRecyclerAdapter = (WrapRecyclerAdapter) adapter;
-                    int headerCount = baseRecyclerAdapter.getHeaderCount();
-                    if (position >= headerCount) {
+                    int itemViewType = baseRecyclerAdapter.getItemViewType(position);
+                    if(itemViewType >= 0) {
+                        int headerCount = baseRecyclerAdapter.getHeaderCount();
                         position -= headerCount;
-                        return mOnItemLongClickListener.onItemLongClicked(mRecyclerView, position, v);
-                    } else {
-                        View headerView = baseRecyclerAdapter.getHeader(position);
-                        if (headerView instanceof BaseRecyclerHeaderFooterView) {
-
-                        }
+                        mOnItemLongClickListener.onItemLongClicked(mRecyclerView, position, v);
                     }
                 } else {
                     return mOnItemLongClickListener.onItemLongClicked(mRecyclerView, position, v);

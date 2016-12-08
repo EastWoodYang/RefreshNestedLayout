@@ -1,18 +1,19 @@
 /**
  * Copyright 2013 Joan Zapata
- * <p>
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.ycdyng.refreshnestedlayout.widget.adapter;
 
 import android.content.Context;
@@ -28,9 +29,9 @@ import java.util.List;
  * Using the provided BaseAdapterHelper, your code is minimalist.
  * @param <T> The type of the items in the list.
  */
-public abstract class BaseQuickAdapter<T, H extends BaseAdapterHelper> extends AutoAdapter {
+public abstract class BaseQuickBaseAdapter<T, H extends BaseAdapterHelper> extends AutoBaseAdapter {
 
-    protected static final String TAG = BaseQuickAdapter.class.getSimpleName();
+    protected static final String TAG = BaseQuickBaseAdapter.class.getSimpleName();
 
     protected final Context context;
 
@@ -45,7 +46,7 @@ public abstract class BaseQuickAdapter<T, H extends BaseAdapterHelper> extends A
      * @param context     The context.
      * @param layoutResId The layout resource id of each item.
      */
-    public BaseQuickAdapter(Context context, int layoutResId) {
+    public BaseQuickBaseAdapter(Context context, int layoutResId) {
         this(context, layoutResId, null);
     }
 
@@ -56,8 +57,7 @@ public abstract class BaseQuickAdapter<T, H extends BaseAdapterHelper> extends A
      * @param layoutResId The layout resource id of each item.
      * @param data        A new list is created out of this one to avoid mutable list
      */
-    public BaseQuickAdapter(Context context, int layoutResId, List<T> data) {
-//        this.data = data == null ? new ArrayList<T>() : new ArrayList<T>(data);
+    public BaseQuickBaseAdapter(Context context, int layoutResId, List<T> data) {
         this.data = data == null ? new ArrayList<T>() : data;
         this.context = context;
         this.layoutResId = layoutResId;
@@ -65,7 +65,7 @@ public abstract class BaseQuickAdapter<T, H extends BaseAdapterHelper> extends A
 
     @Override
     public int getCount() {
-        int extra = autoLoadUsable ? 1 : 0;
+        int extra = autoLoadUsable || (loadEnd && showLoadEnd) ? 1 : 0;
         return data.size() + extra;
     }
 
@@ -96,7 +96,6 @@ public abstract class BaseQuickAdapter<T, H extends BaseAdapterHelper> extends A
             final H helper = getAdapterHelper(position, convertView, parent);
             T item = getItem(position);
             convert(position, helper, item);
-            helper.setAssociatedObject(item);
             return helper.getView();
         }
         return createAutoLoadView(convertView, parent);

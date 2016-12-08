@@ -54,7 +54,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     public static final int SMOOTH_SCROLL_DURATION_MS = 250;
 
-    //private static final String STATE_STATE = "ptr_state";
     private static final String STATE_MODE = "ptr_mode";
     private static final String STATE_ABLE = "ptr_abel";
     private static final String STATE_SUPER = "ptr_super";
@@ -64,7 +63,9 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     private boolean mDisableScrollWhenRefreshing;
 
+    protected boolean mLoadingData;
     protected State mCurrentState = State.RESET;
+    protected LoadState mCurrentLoadState = LoadState.RESET;
     protected Mode mMode = Mode.getDefault();
     protected Mode mCurrentMode;
 
@@ -101,7 +102,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     protected RefreshLoadingLayout mLoadingLayout;
     protected RefreshEmptyLayout mEmptyLayout;
 
-    protected boolean showEmpty = true;
+    protected boolean mShowEmptyLayout = true;
 
     private SmoothScrollRunnable mCurrentSmoothScrollRunnable;
     private Interpolator mScrollAnimationInterpolator;
@@ -211,7 +212,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
             return true;
         }
 
-        if (!isEnabled() || mIsDisable || mCurrentState == State.LOADING_DATA || mMode == Mode.DISABLED || mMode == Mode.AUTO_LOAD
+        if (!isEnabled() || mIsDisable || mLoadingData || mMode == Mode.DISABLED || mMode == Mode.AUTO_LOAD
                 || mNestedScrollInProgress || canChildScrollUp()) {
             // Fail fast if we're not in a state where a swipe is possible
             return false;
@@ -413,11 +414,11 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     }
 
     public final boolean isAutoLoading() {
-        return mCurrentState == State.AUTO_LOADING;
+        return mCurrentLoadState == LoadState.AUTO_LOADING;
     }
 
     public boolean isLoading() {
-        return mCurrentState == State.LOADING_DATA;
+        return mLoadingData;
     }
 
     public final boolean isManualScrolling() {
@@ -583,7 +584,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
             if (mContinueRunning && mScrollToY != mCurrentY) {
                 ViewCompat.postOnAnimation(RefreshNestedLayout.this, this);
             } else {
-                if (mCurrentState == State.AUTO_LOADING && (mMode == Mode.BOTH || mMode == Mode.PULL_TO_REFRESH)) {
+                if (mCurrentLoadState == LoadState.AUTO_LOADING && (mMode == Mode.BOTH || mMode == Mode.PULL_TO_REFRESH)) {
                     mHeaderLayout.onRefreshCancel();
                 }
                 mCurrentState = State.RESET;
@@ -635,10 +636,10 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     private RefreshLoadingLayout createLoadingLayout(Context context, AttributeSet attrs) {
         RefreshLoadingLayout refreshLoadingLayout;
-        View headerView = findViewById(R.id.loading_layout);
-        if (headerView != null) {
-            if (headerView instanceof RefreshLoadingLayout) {
-                refreshLoadingLayout = (RefreshLoadingLayout) headerView;
+        View loadingLayout = findViewById(R.id.loading_layout);
+        if (loadingLayout != null) {
+            if (loadingLayout instanceof RefreshLoadingLayout) {
+                refreshLoadingLayout = (RefreshLoadingLayout) loadingLayout;
                 refreshLoadingLayout.setVisibility(GONE);  // hidden
             } else {
                 throw new IllegalArgumentException("Loading View must be extended RefreshLoadingLayout");
@@ -650,12 +651,12 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         return refreshLoadingLayout;
     }
 
-    public boolean isShowEmpty() {
-        return showEmpty;
+    public boolean isShowEmptyLayout() {
+        return mShowEmptyLayout;
     }
 
-    public void setShowEmpty(boolean showEmpty) {
-        this.showEmpty = showEmpty;
+    public void setShowEmptyLayout(boolean mShowEmptyLayout) {
+        this.mShowEmptyLayout = mShowEmptyLayout;
     }
 
     public void setEmptyLayoutResId(int resId) {
@@ -674,10 +675,19 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     }
 
     public void setEmptyContent(String content) {
+        setEmptyContent(R.id.content_text_view, content);
+    }
+
+    public void setEmptyContent(int viewId, int resId) {
+        String content = mContext.getResources().getText(resId).toString();
+        setEmptyContent(viewId, content);
+    }
+
+    public void setEmptyContent(int viewId, String content) {
         if(mEmptyLayout == null) {
             return;
         }
-        View contentView = mEmptyLayout.findViewById(R.id.content_text_view);
+        View contentView = mEmptyLayout.findViewById(viewId);
         if(contentView instanceof TextView) {
             TextView contentTextView = (TextView) contentView;
             contentTextView.setText(content);
@@ -734,7 +744,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     protected void onRestoreInstanceState(Parcelable state) {
         if (state instanceof Bundle) {
             Bundle bundle = (Bundle) state;
-            //mCurrentState = State.mapIntToValue(bundle.getInt(STATE_STATE));
             mMode = Mode.mapIntToValue(bundle.getInt(STATE_MODE));
             mIsDisable = bundle.getBoolean(STATE_ABLE);
             super.onRestoreInstanceState(bundle.getParcelable(STATE_SUPER));
@@ -750,7 +759,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     @Override
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
-        //bundle.putInt(STATE_STATE, mCurrentState.getIntValue());
         bundle.putInt(STATE_MODE, mMode.getIntValue());
         bundle.putBoolean(STATE_ABLE, mIsDisable);
         bundle.putParcelable(STATE_SUPER, super.onSaveInstanceState());
@@ -817,21 +825,13 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
         RESET(0x0),
 
-        LOADING_DATA(0x4),
-
         SCROLL_TO_REFRESH(0x5),
 
         AUTO_SCROLLING(0x6),
 
         MANUAL_SCROLLING(0x7),
 
-        REFRESHING(0x8),
-
-        AUTO_LOADING(0x10),
-
-        LOADING_ERROR(0x11),
-
-        LOADING_END(0x12);
+        REFRESHING(0x8);
 
         static State mapIntToValue(final int stateInt) {
             for (State value : State.values()) {
@@ -845,6 +845,36 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         private int mIntValue;
 
         State(int intValue) {
+            mIntValue = intValue;
+        }
+
+        int getIntValue() {
+            return mIntValue;
+        }
+    }
+
+    public enum LoadState {
+
+        RESET(0x0),
+
+        AUTO_LOADING(0x10),
+
+        LOADING_ERROR(0x11),
+
+        LOADING_END(0x12);
+
+        static LoadState mapIntToValue(final int stateInt) {
+            for (LoadState value : LoadState.values()) {
+                if (stateInt == value.getIntValue()) {
+                    return value;
+                }
+            }
+            return RESET;
+        }
+
+        private int mIntValue;
+
+        LoadState(int intValue) {
             mIntValue = intValue;
         }
 
@@ -868,9 +898,14 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
             case REFRESHING:
                 mCurrentState = State.REFRESHING;
                 break;
-            case AUTO_LOADING:
-                mCurrentState = State.AUTO_LOADING;
-                break;
+        }
+    }
+
+    protected void setLoadState(boolean loadable) {
+        if (loadable) {
+            mCurrentLoadState = LoadState.RESET;
+        } else {
+            mCurrentLoadState = LoadState.LOADING_END;
         }
     }
 
@@ -891,23 +926,16 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         smoothScrollTo(0);
     }
 
-    public void onAutoLoadingComplete(boolean usable) {
-        if (mCurrentState == State.AUTO_LOADING) {
-            if (usable) {
-                mCurrentState = State.RESET;
-            } else {
-                mCurrentState = State.LOADING_ERROR;
-            }
-        }
+    public void onAutoLoadingComplete(boolean loadable) {
+        setLoadState(loadable);
     }
 
     public void onAutoLoadingError() {
-        if (mCurrentState == State.AUTO_LOADING) {
-            mCurrentState = State.LOADING_ERROR;
-        }
+        mCurrentLoadState = LoadState.LOADING_ERROR;
     }
 
-    public void onRefreshComplete() {
+    public void onRefreshComplete(boolean loadable) {
+        setLoadState(loadable);
         if (mHeaderLayout != null) {
             mHeaderLayout.onRefreshFinish();
         }
@@ -916,7 +944,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     }
 
     public void onLoadingDataStart() {
-        mCurrentState = State.LOADING_DATA;
+        mLoadingData = true;
         mRefreshableView.setVisibility(GONE);
         mEmptyLayout.setVisibility(GONE);
         if(Build.VERSION.SDK_INT >= 12) {
@@ -925,8 +953,9 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mLoadingLayout.setVisibility(VISIBLE);
     }
 
-    public void onLoadingDataComplete() {
-        mCurrentState = State.RESET;
+    public void onLoadingDataComplete(boolean loadable) {
+        setLoadState(loadable);
+        mLoadingData = false;
         crossFading(mRefreshableView, mLoadingLayout);
         checkBody();
     }

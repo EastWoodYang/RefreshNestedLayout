@@ -28,11 +28,12 @@ import com.ycdyng.refreshnestedlayout.kernel.RecycleViewDivider;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshRecyclerView;
+import com.ycdyng.refreshnestedlayout.widget.adapter.AutoRecyclerAdapter;
 import com.ycdyng.refreshnestedlayout.widget.adapter.WrapRecyclerAdapter;
 
 public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<RefreshRecyclerView> {
 
-    private WrapRecyclerAdapter mWrapRecyclerAdapter;
+    private AutoRecyclerAdapter mAutoRecyclerAdapter;
     private OnAutoLoadListener mOnAutoLoadListener;
     private boolean mDisableDivider = true;
     private int mDividerHeight;
@@ -108,23 +109,23 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy >= 0 && mOnAutoLoadListener != null && isAutoLoad()) { // scroll down
+                if (dy >= 0 && mOnAutoLoadListener != null && getAutoLoadUsable()) { // scroll down
                     RecyclerView.LayoutManager layoutManager = mRefreshableView.getLayoutManager();
                     if (layoutManager != null && layoutManager instanceof LinearLayoutManager) {
                         LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
                         int visibleItemCount = linearLayoutManager.getChildCount();
                         int totalItemCount = linearLayoutManager.getItemCount();
                         int firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
-                        if ((visibleItemCount + firstVisibleItem) >= totalItemCount &&
-                                (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING ||
-                                        mCurrentState == State.LOADING_END || mCurrentState == State.LOADING_ERROR || mCurrentState == State.SCROLL_TO_REFRESH)) {
-                            if (getAutoLoadUsable()) {
-                                if (mCurrentState == State.LOADING_END) {
+                        if (mCurrentLoadState != LoadState.AUTO_LOADING && (visibleItemCount + firstVisibleItem) >= totalItemCount &&
+                                (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.SCROLL_TO_REFRESH ||
+                                        mCurrentLoadState == LoadState.LOADING_END || mCurrentLoadState == LoadState.LOADING_ERROR)) {
+                            if (!isManualLoad()) {
+                                if (mCurrentLoadState == LoadState.LOADING_END) {
                                     // do nothing...
-                                } else if (mCurrentState == State.LOADING_ERROR) {
+                                } else if (mCurrentLoadState == LoadState.LOADING_ERROR) {
                                     // do nothing...
                                 } else {
-                                    setState(State.AUTO_LOADING);
+                                    mCurrentLoadState = LoadState.AUTO_LOADING;
                                     mOnAutoLoadListener.onLoading();
                                 }
                             }
@@ -163,25 +164,37 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
     }
 
     public void setAdapter(RecyclerView.Adapter adapter) {
-        if (adapter instanceof WrapRecyclerAdapter) {
-            mWrapRecyclerAdapter = (WrapRecyclerAdapter) adapter;
-            mWrapRecyclerAdapter.setOnLastItemClickListener(mLastItemOnClickListener);
-            mWrapRecyclerAdapter.setAutoLoadResId(mAutoLoadResId);
-            mWrapRecyclerAdapter.setClickableResId(mClickableResId);
-            mWrapRecyclerAdapter.setLoadEndResId(mLoadEndResId);
-            mWrapRecyclerAdapter.setLoadErrorResId(mLoadErrorResId);
-            mRefreshableView.setAdapter(mWrapRecyclerAdapter);
+        if (adapter instanceof AutoRecyclerAdapter) {
+            mAutoRecyclerAdapter = (AutoRecyclerAdapter) adapter;
+            mAutoRecyclerAdapter.setOnLastItemClickListener(mLastItemOnClickListener);
+            mAutoRecyclerAdapter.setAutoLoadResId(mAutoLoadResId);
+            mAutoRecyclerAdapter.setClickableResId(mClickableResId);
+            mAutoRecyclerAdapter.setLoadEndResId(mLoadEndResId);
+            mAutoRecyclerAdapter.setLoadErrorResId(mLoadErrorResId);
+            mRefreshableView.setAdapter(mAutoRecyclerAdapter);
         } else {
-            throw new IllegalArgumentException("RecyclerView.Adapter must be extends WrapRecyclerAdapter");
+            throw new IllegalArgumentException("Adapter must be extends QuickRecyclerAdapter or WrapRecyclerAdapter");
         }
     }
 
     public boolean getAutoLoadUsable() {
-        return mWrapRecyclerAdapter.getAutoLoadUsable();
+        return mAutoRecyclerAdapter.getAutoLoadUsable();
     }
 
     public void setAutoLoadUsable(boolean usable) {
-        mWrapRecyclerAdapter.setAutoLoadUsable(usable);
+        mAutoRecyclerAdapter.setAutoLoadUsable(usable);
+    }
+
+    public void setShowLoadEnd(boolean usable) {
+        mAutoRecyclerAdapter.setShowLoadEnd(usable);
+    }
+
+    public boolean isManualLoad() {
+        return mAutoRecyclerAdapter.isManualLoad();
+    }
+
+    public void setManualLoad(boolean autoLoad) {
+        mAutoRecyclerAdapter.setManualLoad(autoLoad);
     }
 
     public void setOnScrollListener(RecyclerView.OnScrollListener listener) {
@@ -192,70 +205,40 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
         mOnAutoLoadListener = listener;
     }
 
-    private boolean isFirstItemVisible() {
-        final RecyclerView.Adapter adapter = mRefreshableView.getAdapter();
-        if (null == adapter || adapter.getItemCount() == 0) {
-            return true;
-        } else {
-            RecyclerView.LayoutManager layoutManager = mRefreshableView.getLayoutManager();
-            if (layoutManager != null && layoutManager instanceof LinearLayoutManager) {
-                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
-                if (linearLayoutManager.findFirstVisibleItemPosition() <= 1) {
-                    final View firstVisibleChild = mRefreshableView.getChildAt(0);
-                    if (firstVisibleChild != null) {
-                        return firstVisibleChild.getTop() >= mRefreshableView.getTop();
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException("LayoutManager must be LinearLayoutManager");
-            }
-        }
-        return false;
-    }
-
-    private boolean isLastItemVisible() {
-        final RecyclerView.Adapter adapter = mRefreshableView.getAdapter();
-        if (null == adapter || adapter.getItemCount() == 0) {
-            return true;
-        } else {
-            RecyclerView.LayoutManager layoutManager = mRefreshableView.getLayoutManager();
-            if (layoutManager != null && layoutManager instanceof LinearLayoutManager) {
-                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
-                int totalItemCount = linearLayoutManager.getItemCount();
-                final int lastItemPosition = totalItemCount - 1;
-                final int lastVisiblePosition = linearLayoutManager.findLastVisibleItemPosition();
-                if (lastVisiblePosition >= lastItemPosition - 1) {
-                    final int firstVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition();
-                    final int childIndex = lastVisiblePosition - firstVisiblePosition;
-                    final View lastVisibleChild = mRefreshableView.getChildAt(childIndex);
-                    if (lastVisibleChild != null) {
-                        return lastVisibleChild.getBottom() <= mRefreshableView.getBottom();
-                    }
-                }
-            } else {
-                throw new IllegalArgumentException("LayoutManager must be LinearLayoutManager");
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void onRefreshComplete() {
-        super.onRefreshComplete();
-        resetLastItemView();
-    }
-
     @Override
     protected void checkBody() {
-        if (showEmpty && mWrapRecyclerAdapter.getItemCount() == 0 && !mWrapRecyclerAdapter.getAutoLoadUsable()) {
+        if (mShowEmptyLayout && !mAutoRecyclerAdapter.getAutoLoadUsable() &&
+                ((mCurrentLoadState == LoadState.RESET && mAutoRecyclerAdapter.getItemCount() == 0) ||
+                (mCurrentLoadState == LoadState.LOADING_END && mAutoRecyclerAdapter.getItemCount() <= 1 && mAutoRecyclerAdapter.getLastItemViewType() == AutoRecyclerAdapter.END_VIEW_TYPE))) {
             crossFading(mEmptyLayout, mRefreshableView);
         } else {
             crossFading(mRefreshableView, mEmptyLayout);
         }
     }
 
-    public void onAutoLoadingComplete() {
-        onAutoLoadingComplete(true);
+    @Override
+    public void onLoadingDataComplete(boolean loadable) {
+        super.onLoadingDataComplete(loadable);
+        if(!loadable) {
+            mAutoRecyclerAdapter.setLoadEnd(true);
+            mAutoRecyclerAdapter.setLoadError(false);
+            mAutoRecyclerAdapter.setLoading(false);
+            mAutoRecyclerAdapter.notifyItemChanged(mAutoRecyclerAdapter.getItemCount());
+        }
+    }
+
+    @Override
+    public void onRefreshComplete(boolean loadable) {
+        if(loadable) {
+            super.onRefreshComplete(true);
+            resetLastItemView();
+        } else {
+            mAutoRecyclerAdapter.setLoadEnd(true);
+            mAutoRecyclerAdapter.setLoadError(false);
+            mAutoRecyclerAdapter.setLoading(false);
+            mAutoRecyclerAdapter.notifyItemChanged(mAutoRecyclerAdapter.getItemCount());
+            super.onRefreshComplete(false);
+        }
     }
 
     @Override
@@ -264,64 +247,40 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
         if (usable) {
             resetLastItemView();
         } else {
-            if (isFirstItemVisible() && isLastItemVisible()) {
-                if (mWrapRecyclerAdapter != null) {
-                    mWrapRecyclerAdapter.setLoadEnd(false);
-                    mWrapRecyclerAdapter.setLoadError(false);
-                    mWrapRecyclerAdapter.setLoading(false);
-                    mWrapRecyclerAdapter.setAutoLoadUsable(false);
-                }
-            } else {
-                if (mWrapRecyclerAdapter != null) {
-                    mWrapRecyclerAdapter.setLoadEnd(true);
-                    mWrapRecyclerAdapter.setLoadError(false);
-                    mWrapRecyclerAdapter.setLoading(false);
-                    mWrapRecyclerAdapter.notifyItemChanged(mWrapRecyclerAdapter.getItemCount());
-                }
-            }
+            mAutoRecyclerAdapter.setLoadEnd(true);
+            mAutoRecyclerAdapter.setLoadError(false);
+            mAutoRecyclerAdapter.setLoading(false);
+            mAutoRecyclerAdapter.notifyItemChanged(mAutoRecyclerAdapter.getItemCount());
         }
     }
 
     @Override
     public void onAutoLoadingError() {
         super.onAutoLoadingError();
-        mWrapRecyclerAdapter.setLoadEnd(false);
-        mWrapRecyclerAdapter.setLoadError(true);
-        mWrapRecyclerAdapter.setLoading(false);
-        mWrapRecyclerAdapter.notifyItemChanged(mWrapRecyclerAdapter.getItemCount());
-    }
-
-    public boolean isAutoLoad() {
-        if (mWrapRecyclerAdapter != null) {
-            return mWrapRecyclerAdapter.isAutoLoad();
-        }
-        return false;
-    }
-
-    public void setAutoLoad(boolean autoLoad) {
-        if (mWrapRecyclerAdapter != null) {
-            mWrapRecyclerAdapter.setAutoLoad(autoLoad);
-        }
+        mAutoRecyclerAdapter.setLoadEnd(false);
+        mAutoRecyclerAdapter.setLoadError(true);
+        mAutoRecyclerAdapter.setLoading(false);
+        mAutoRecyclerAdapter.notifyItemChanged(mAutoRecyclerAdapter.getItemCount());
     }
 
     private void resetLastItemView() {
-        if (mWrapRecyclerAdapter.isLoadEnd() || mWrapRecyclerAdapter.isLoadError()) {
-            mWrapRecyclerAdapter.setLoadEnd(false);
-            mWrapRecyclerAdapter.setLoadError(false);
-            mWrapRecyclerAdapter.setLoading(false);
-            mWrapRecyclerAdapter.notifyItemChanged(mWrapRecyclerAdapter.getItemCount());
+        if (mAutoRecyclerAdapter.isManualLoad() || mAutoRecyclerAdapter.isLoadEnd() || mAutoRecyclerAdapter.isLoadError()) {
+            mAutoRecyclerAdapter.setLoadEnd(false);
+            mAutoRecyclerAdapter.setLoadError(false);
+            mAutoRecyclerAdapter.setLoading(false);
+            mAutoRecyclerAdapter.notifyItemChanged(mAutoRecyclerAdapter.getItemCount());
         }
     }
 
     private View.OnClickListener mLastItemOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            setState(State.AUTO_LOADING);
-            if (!mWrapRecyclerAdapter.isAutoLoad()) {
-                mWrapRecyclerAdapter.setLoadEnd(false);
-                mWrapRecyclerAdapter.setLoadError(false);
-                mWrapRecyclerAdapter.setLoading(true);
-                mWrapRecyclerAdapter.notifyItemChanged(mWrapRecyclerAdapter.getItemCount());
+            mCurrentLoadState = LoadState.AUTO_LOADING;
+            if (mAutoRecyclerAdapter.isManualLoad()) {
+                mAutoRecyclerAdapter.setLoadEnd(false);
+                mAutoRecyclerAdapter.setLoadError(false);
+                mAutoRecyclerAdapter.setLoading(true);
+                mAutoRecyclerAdapter.notifyItemChanged(mAutoRecyclerAdapter.getItemCount());
             } else {
                 resetLastItemView();
             }

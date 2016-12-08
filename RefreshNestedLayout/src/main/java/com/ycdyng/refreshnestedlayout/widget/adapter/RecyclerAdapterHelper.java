@@ -1,5 +1,5 @@
-/**
- * Copyright 2013 Joan Zapata
+/*
+ * Copyright 2016 EastWood Yang
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,10 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v7.widget.RecyclerView;
 import android.text.util.Linkify;
 import android.util.SparseArray;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.Adapter;
 import android.widget.AdapterView;
@@ -36,74 +35,28 @@ import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-/**
- * Allows an abstraction of the ViewHolder pattern.<br>
- * <br>
- * <p/>
- * <b>Usage</b>
- * <p/>
- * <pre>
- * return BaseAdapterHelper.get(context, convertView, parent, R.layout.item)
- *         .setText(R.id.tvName, contact.getName())
- *         .setText(R.id.tvEmails, contact.getEmails().toString())
- *         .setText(R.id.tvNumbers, contact.getNumbers().toString())
- *         .getView();
- * </pre>
- */
-public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
+public class RecyclerAdapterHelper extends RecyclerView.ViewHolder implements ViewHelper<RecyclerAdapterHelper> {
 
-    /** Views indexed with their IDs */
+    private Context context;
+
     private final SparseArray<View> views;
-
-    private final Context context;
-
-    private int position;
 
     private View convertView;
 
-    protected BaseAdapterHelper(Context context, ViewGroup parent, int layoutId) {
+    RecyclerAdapterHelper(Context context, View itemView) {
+        super(itemView);
         this.context = context;
-        this.views = new SparseArray<View>();
-        convertView = LayoutInflater.from(context).inflate(layoutId, parent, false);
+        this.views = new SparseArray<>();
+        convertView = itemView;
         convertView.setTag(this);
     }
 
-    /**
-     * This method is the only entry point to get a BaseAdapterHelper.
-     * @param context     The current context.
-     * @param convertView The convertView arg passed to the getView() method.
-     * @param parent      The parent arg passed to the getView() method.
-     * @return A BaseAdapterHelper instance.
-     */
-    public static BaseAdapterHelper get(Context context, View convertView, ViewGroup parent, int layoutId) {
-        return get(context, convertView, parent, layoutId, -1);
-    }
-
-    /** This method is package private and should only be used by QuickAdapter. */
-    static BaseAdapterHelper get(Context context, View convertView, ViewGroup parent, int layoutId, int position) {
-        if (convertView == null) {
-            return new BaseAdapterHelper(context, parent, layoutId);
-        }
-
-        // Retrieve the existing helper and update its position
-        BaseAdapterHelper existingHelper = (BaseAdapterHelper) convertView.getTag();
-        existingHelper.position = position;
-        return existingHelper;
-    }
-
-    /**
-     * Retrieve the overall position of the data in the list.
-     * @throws IllegalArgumentException If the position hasn't been set at the construction of the this helper.
-     */
-    public int getPosition() {
-        if (position == -1)
-            throw new IllegalStateException("Use BaseAdapterHelper constructor " +
-                    "with position if you need to retrieve the position.");
-        return position;
+    public View getView() {
+        return convertView;
     }
 
     @SuppressWarnings("unchecked")
-    private  <T extends View> T retrieveView(int viewId) {
+    private <T extends View> T retrieveView(int viewId) {
         View view = views.get(viewId);
         if (view == null) {
             view = convertView.findViewById(viewId);
@@ -112,80 +65,75 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
         return (T) view;
     }
 
-    /** Retrieve the convertView */
-    public View getView() {
-        return convertView;
-    }
-
     @Override
     public <T extends View> T getView(int viewId) {
         return retrieveView(viewId);
     }
 
     @Override
-    public BaseAdapterHelper setText(int viewId, String value) {
+    public RecyclerAdapterHelper setText(int viewId, String value) {
         TextView view = retrieveView(viewId);
         view.setText(value);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setText(int viewId, CharSequence value) {
+    public RecyclerAdapterHelper setText(int viewId, CharSequence value) {
         TextView view = retrieveView(viewId);
         view.setText(value);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setText(int viewId, int valueId) {
+    public RecyclerAdapterHelper setText(int viewId, int valueId) {
         TextView view = retrieveView(viewId);
         view.setText(valueId);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setImageResource(int viewId, int imageResId) {
+    public RecyclerAdapterHelper setImageResource(int viewId, int imageResId) {
         ImageView view = retrieveView(viewId);
         view.setImageResource(imageResId);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setBackgroundColor(int viewId, int color) {
+    public RecyclerAdapterHelper setBackgroundColor(int viewId, int color) {
         View view = retrieveView(viewId);
         view.setBackgroundColor(color);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setBackgroundRes(int viewId, int backgroundRes) {
+    public RecyclerAdapterHelper setBackgroundRes(int viewId, int backgroundRes) {
         View view = retrieveView(viewId);
         view.setBackgroundResource(backgroundRes);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setTextColor(int viewId, int textColor) {
+    public RecyclerAdapterHelper setTextColor(int viewId, int textColor) {
         TextView view = retrieveView(viewId);
         view.setTextColor(textColor);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setTextColorRes(int viewId, int textColorRes) {
+    public RecyclerAdapterHelper setTextColorRes(int viewId, int textColorRes) {
         TextView view = retrieveView(viewId);
         view.setTextColor(context.getResources().getColor(textColorRes));
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setImageDrawable(int viewId, Drawable drawable) {
+    public RecyclerAdapterHelper setImageDrawable(int viewId, Drawable drawable) {
         ImageView view = retrieveView(viewId);
         view.setImageDrawable(drawable);
         return this;
     }
 
-//    public BaseAdapterHelper setImageUrl(int viewId, String imageUrl, ImageLoader imageLoader) {
+//    public RecyclerAdapterHelper setImageUrl(int viewId, String imageUrl, ImageLoader imageLoader) {
 //        ImageView view = retrieveView(viewId);
 //        imageLoader.displayImage(imageUrl, view);
 //
@@ -196,8 +144,8 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
 ////        }
 //        return this;
 //    }
-//
-//    public BaseAdapterHelper setImageUrl(int viewId, String imageUrl, ImageLoader imageLoader, DisplayImageOptions options) {
+
+//    public RecyclerAdapterHelper setImageUrl(int viewId, String imageUrl, ImageLoader imageLoader, DisplayImageOptions options) {
 //        ImageView view = retrieveView(viewId);
 //        imageLoader.displayImage(imageUrl, view, options);
 //
@@ -210,14 +158,14 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
 //    }
 
     @Override
-    public BaseAdapterHelper setImageBitmap(int viewId, Bitmap bitmap) {
+    public RecyclerAdapterHelper setImageBitmap(int viewId, Bitmap bitmap) {
         ImageView view = retrieveView(viewId);
         view.setImageBitmap(bitmap);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setAlpha(int viewId, float value) {
+    public RecyclerAdapterHelper setAlpha(int viewId, float value) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             retrieveView(viewId).setAlpha(value);
         } else {
@@ -231,21 +179,21 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
     }
 
     @Override
-    public BaseAdapterHelper setVisibility(int viewId, int visibility) {
+    public RecyclerAdapterHelper setVisibility(int viewId, int visibility) {
         View view = retrieveView(viewId);
         view.setVisibility(visibility);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper linkify(int viewId) {
+    public RecyclerAdapterHelper linkify(int viewId) {
         TextView view = retrieveView(viewId);
         Linkify.addLinks(view, Linkify.ALL);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setTypeface(int viewId, Typeface typeface) {
+    public RecyclerAdapterHelper setTypeface(int viewId, Typeface typeface) {
         TextView view = retrieveView(viewId);
         view.setTypeface(typeface);
         view.setPaintFlags(view.getPaintFlags() | Paint.SUBPIXEL_TEXT_FLAG);
@@ -253,7 +201,7 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
     }
 
     @Override
-    public BaseAdapterHelper setTypeface(Typeface typeface, int... viewIds) {
+    public RecyclerAdapterHelper setTypeface(Typeface typeface, int... viewIds) {
         for (int viewId : viewIds) {
             TextView view = retrieveView(viewId);
             view.setTypeface(typeface);
@@ -263,14 +211,14 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
     }
 
     @Override
-    public BaseAdapterHelper setProgress(int viewId, int progress) {
+    public RecyclerAdapterHelper setProgress(int viewId, int progress) {
         ProgressBar view = retrieveView(viewId);
         view.setProgress(progress);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setProgress(int viewId, int progress, int max) {
+    public RecyclerAdapterHelper setProgress(int viewId, int progress, int max) {
         ProgressBar view = retrieveView(viewId);
         view.setMax(max);
         view.setProgress(progress);
@@ -278,21 +226,21 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
     }
 
     @Override
-    public BaseAdapterHelper setMax(int viewId, int max) {
+    public RecyclerAdapterHelper setMax(int viewId, int max) {
         ProgressBar view = retrieveView(viewId);
         view.setMax(max);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setRating(int viewId, float rating) {
+    public RecyclerAdapterHelper setRating(int viewId, float rating) {
         RatingBar view = retrieveView(viewId);
         view.setRating(rating);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setRating(int viewId, float rating, int max) {
+    public RecyclerAdapterHelper setRating(int viewId, float rating, int max) {
         RatingBar view = retrieveView(viewId);
         view.setMax(max);
         view.setRating(rating);
@@ -300,70 +248,70 @@ public class BaseAdapterHelper implements ViewHelper<BaseAdapterHelper> {
     }
 
     @Override
-    public BaseAdapterHelper setOnClickListener(int viewId, View.OnClickListener listener) {
+    public RecyclerAdapterHelper setOnClickListener(int viewId, View.OnClickListener listener) {
         View view = retrieveView(viewId);
         view.setOnClickListener(listener);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setOnTouchListener(int viewId, View.OnTouchListener listener) {
+    public RecyclerAdapterHelper setOnTouchListener(int viewId, View.OnTouchListener listener) {
         View view = retrieveView(viewId);
         view.setOnTouchListener(listener);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setOnLongClickListener(int viewId, View.OnLongClickListener listener) {
+    public RecyclerAdapterHelper setOnLongClickListener(int viewId, View.OnLongClickListener listener) {
         View view = retrieveView(viewId);
         view.setOnLongClickListener(listener);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setOnItemClickListener(int viewId, AdapterView.OnItemClickListener listener) {
+    public RecyclerAdapterHelper setOnItemClickListener(int viewId, AdapterView.OnItemClickListener listener) {
         AdapterView view = retrieveView(viewId);
         view.setOnItemClickListener(listener);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setOnItemLongClickListener(int viewId, AdapterView.OnItemLongClickListener listener) {
+    public RecyclerAdapterHelper setOnItemLongClickListener(int viewId, AdapterView.OnItemLongClickListener listener) {
         AdapterView view = retrieveView(viewId);
         view.setOnItemLongClickListener(listener);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setOnItemSelectedClickListener(int viewId, AdapterView.OnItemSelectedListener listener) {
+    public RecyclerAdapterHelper setOnItemSelectedClickListener(int viewId, AdapterView.OnItemSelectedListener listener) {
         AdapterView view = retrieveView(viewId);
         view.setOnItemSelectedListener(listener);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setTag(int viewId, Object tag) {
+    public RecyclerAdapterHelper setTag(int viewId, Object tag) {
         View view = retrieveView(viewId);
         view.setTag(tag);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setTag(int viewId, int key, Object tag) {
+    public RecyclerAdapterHelper setTag(int viewId, int key, Object tag) {
         View view = retrieveView(viewId);
         view.setTag(key, tag);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setChecked(int viewId, boolean checked) {
-        Checkable view = (Checkable) retrieveView(viewId);
+    public RecyclerAdapterHelper setChecked(int viewId, boolean checked) {
+        Checkable view = retrieveView(viewId);
         view.setChecked(checked);
         return this;
     }
 
     @Override
-    public BaseAdapterHelper setAdapter(int viewId, Adapter adapter) {
+    public RecyclerAdapterHelper setAdapter(int viewId, Adapter adapter) {
         AdapterView view = retrieveView(viewId);
         view.setAdapter(adapter);
         return this;

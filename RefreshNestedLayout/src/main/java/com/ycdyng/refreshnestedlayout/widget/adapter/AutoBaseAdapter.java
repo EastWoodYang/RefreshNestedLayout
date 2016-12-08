@@ -21,27 +21,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
-public abstract class AutoAdapter extends BaseAdapter {
+public abstract class AutoBaseAdapter extends BaseAdapter {
 
     protected boolean autoLoadUsable;
 
-    protected boolean autoLoad = true;
-
+    protected boolean manualLoad;
     protected boolean loadError;
-
     protected boolean loadEnd;
-
     protected boolean loading;
 
+    protected boolean showLoadEnd;
+
     protected int autoLoadResId;
-
     protected int clickableResId;
-
     protected int loadEndResId;
-
     protected int loadErrorResId;
 
     protected View.OnClickListener mOnLastItemClickListener;
+
+    public int getLastItemViewType() {
+        int count = getCount();
+        if(count == 0) {
+            return 1;
+        } else {
+            return getItemViewType(count - 1);
+        }
+    }
 
     protected View createAutoLoadView(View convertView, ViewGroup parent) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
@@ -51,7 +56,7 @@ public abstract class AutoAdapter extends BaseAdapter {
         } else if (loadEnd) {
             convertView = layoutInflater.inflate(loadEndResId, parent, false);
         } else {
-            if (autoLoad || loading) {
+            if (!manualLoad || loading) {
                 convertView = layoutInflater.inflate(autoLoadResId, parent, false);
             } else {
                 convertView = layoutInflater.inflate(clickableResId, parent, false);
@@ -71,12 +76,12 @@ public abstract class AutoAdapter extends BaseAdapter {
         return autoLoadUsable;
     }
 
-    public boolean isAutoLoad() {
-        return autoLoad;
+    public boolean isManualLoad() {
+        return manualLoad;
     }
 
-    public void setAutoLoad(boolean autoLoad) {
-        this.autoLoad = autoLoad;
+    public void setManualLoad(boolean manualLoad) {
+        this.manualLoad = manualLoad;
     }
 
     public boolean isLoadError() {
@@ -101,6 +106,14 @@ public abstract class AutoAdapter extends BaseAdapter {
 
     public void setLoading(boolean loading) {
         this.loading = loading;
+    }
+
+    public boolean isShowLoadEnd() {
+        return showLoadEnd;
+    }
+
+    public void setShowLoadEnd(boolean showLoadEnd) {
+        this.showLoadEnd = showLoadEnd;
     }
 
     public void setAutoLoadResId(int resId) {
@@ -138,4 +151,5 @@ public abstract class AutoAdapter extends BaseAdapter {
     public void setOnLastItemClickListener(View.OnClickListener listener) {
         this.mOnLastItemClickListener = listener;
     }
+
 }

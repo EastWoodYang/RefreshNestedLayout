@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <declare-styleable name="RefreshNestedLayout">
         <attr name="mode">
             <flag name="both" value="0x0"/>
@@ -26,4 +27,5 @@
         <attr name="loadEndLayout" format="reference"/>
         <attr name="loadErrorLayout" format="reference"/>
     </declare-styleable>
+
 </resources>

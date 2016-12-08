@@ -16,16 +16,9 @@
 
 package com.ycdyng.refreshnestedlayout.custom;
 
-import android.animation.Keyframe;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.content.Context;
-import android.os.Build;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ycdyng.refreshnestedlayout.R;
@@ -33,37 +26,17 @@ import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
 
 public class DefaultHeaderLayout extends RefreshHeaderLayout {
 
-    private TextView mRefreshTipTextView;
-    private ImageView mFeelerLeftImageView;
-    private ImageView mFeelerRightImageView;
-    private ObjectAnimator mFeelerLeftObjectAnimator;
-    private ObjectAnimator mFeelerRightObjectAnimator;
-
-    private static float SHAKE_DISTANCE = 1.5f;
+    private TextView mTipTextView;
 
     public DefaultHeaderLayout(Context context) {
-        super(context);
-        init(context, null);
+        this(context, null);
     }
 
     public DefaultHeaderLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
-    }
 
-    public void init(Context context, AttributeSet attrs) {
         LayoutInflater.from(context).inflate(R.layout.default_header_layout, this);
-        mRefreshTipTextView = (TextView) findViewById(R.id.refresh_tip_text_view);
-        mFeelerLeftImageView = (ImageView) findViewById(R.id.feeler_left_image_view);
-        mFeelerRightImageView = (ImageView) findViewById(R.id.feeler_right_image_view);
-        if (Build.VERSION.SDK_INT >= 18) {
-            mFeelerLeftObjectAnimator = nope(mFeelerLeftImageView);
-            mFeelerLeftObjectAnimator.setRepeatCount(30);
-            mFeelerLeftObjectAnimator.setAutoCancel(true);
-            mFeelerRightObjectAnimator = nope(mFeelerRightImageView);
-            mFeelerRightObjectAnimator.setRepeatCount(30);
-            mFeelerRightObjectAnimator.setAutoCancel(true);
-        }
+        mTipTextView = (TextView) findViewById(R.id.tip_text_view);
     }
 
     @Override
@@ -73,52 +46,25 @@ public class DefaultHeaderLayout extends RefreshHeaderLayout {
 
     @Override
     public void alreadyToRefresh(boolean alreadyToRefresh) {
-
+        if(alreadyToRefresh) {
+            mTipTextView.setText(R.string.release_to_refresh);
+        } else {
+            mTipTextView.setText(R.string.pull_to_refresh);
+        }
     }
 
     @Override
     public void onRefreshBegin() {
-        if (Build.VERSION.SDK_INT >= 18) {
-            mFeelerLeftObjectAnimator.start();
-            mFeelerRightObjectAnimator.start();
-        }
+        mTipTextView.setText(R.string.refreshing);
     }
 
     @Override
     public void onRefreshFinish() {
-        if (Build.VERSION.SDK_INT >= 18) {
-            mFeelerLeftObjectAnimator.cancel();
-            mFeelerRightObjectAnimator.cancel();
-        }
+        mTipTextView.setText("");
     }
 
     @Override
     public void onRefreshCancel() {
 
-    }
-
-
-    public static ObjectAnimator nope(View view) {
-        if (Build.VERSION.SDK_INT >= 11) {
-            int delta = convertDpToPixel(view.getContext(), SHAKE_DISTANCE);
-            PropertyValuesHolder pvhTranslateX = PropertyValuesHolder.ofKeyframe("translationX",
-                    Keyframe.ofFloat(0f, 0),
-                    Keyframe.ofFloat(.10f, -delta),
-                    Keyframe.ofFloat(.26f, delta),
-                    Keyframe.ofFloat(.42f, -delta),
-                    Keyframe.ofFloat(.58f, delta),
-                    Keyframe.ofFloat(.74f, -delta),
-                    Keyframe.ofFloat(.90f, delta),
-                    Keyframe.ofFloat(1f, 0f)
-            );
-            return ObjectAnimator.ofPropertyValuesHolder(view, pvhTranslateX).setDuration(500);
-        } else {
-            return null;
-        }
-    }
-
-    private static int convertDpToPixel(Context context, float sizeInDip) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, sizeInDip, context.getResources().getDisplayMetrics());
-        //return TypedValue.complexToDimensionPixelSize(sizeInDip, getResources().getDisplayMetrics());
     }
 }

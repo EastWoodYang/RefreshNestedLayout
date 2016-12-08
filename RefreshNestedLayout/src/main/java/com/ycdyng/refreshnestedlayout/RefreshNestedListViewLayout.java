@@ -22,19 +22,17 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.Adapter;
 import android.widget.BaseAdapter;
-import android.widget.HeaderViewListAdapter;
 
 import com.ycdyng.refreshnestedlayout.custom.DefaultHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshListView;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
-import com.ycdyng.refreshnestedlayout.widget.adapter.AutoAdapter;
+import com.ycdyng.refreshnestedlayout.widget.adapter.AutoBaseAdapter;
 
 public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshListView> {
 
-    private AutoAdapter mAutoAdapter;
+    private AutoBaseAdapter mAutoBaseAdapter;
     private RefreshNestedLayout.OnAutoLoadListener mOnAutoLoadListener;
     private OnScrollListener mOriginalScrollListener;
 
@@ -108,17 +106,17 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
                 if (mOriginalScrollListener != null) {
                     mOriginalScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
                 }
-                if ((firstVisibleItem + visibleItemCount >= totalItemCount) &&
-                        (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING ||
-                                mCurrentState == State.LOADING_ERROR || mCurrentState == State.LOADING_END || mCurrentState == State.SCROLL_TO_REFRESH)) {
+                if (mCurrentLoadState != LoadState.AUTO_LOADING && (firstVisibleItem + visibleItemCount >= totalItemCount) &&
+                        (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.SCROLL_TO_REFRESH ||
+                                mCurrentLoadState == LoadState.LOADING_ERROR || mCurrentLoadState == LoadState.LOADING_END)) {
                     if (mOnAutoLoadListener != null && getAutoLoadUsable()) {
-                        if (isAutoLoad()) {
-                            if (mCurrentState == State.LOADING_END) {
+                        if (!isManualLoad()) {
+                            if (mCurrentLoadState == LoadState.LOADING_END) {
                                 // do nothing...
-                            } else if (mCurrentState == State.LOADING_ERROR) {
+                            } else if (mCurrentLoadState == LoadState.LOADING_ERROR) {
                                 // do nothing...
                             } else {
-                                setState(State.AUTO_LOADING);
+                                mCurrentLoadState = LoadState.AUTO_LOADING;
                                 mOnAutoLoadListener.onLoading();
                             }
                         }
@@ -130,35 +128,37 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
     }
 
     public void setAdapter(BaseAdapter baseAdapter) {
-        if (baseAdapter instanceof AutoAdapter) {
-            mAutoAdapter = (AutoAdapter) baseAdapter;
-            mAutoAdapter.setOnLastItemClickListener(mLastItemOnClickListener);
-            mAutoAdapter.setAutoLoadResId(mAutoLoadResId);
-            mAutoAdapter.setClickableResId(mClickableResId);
-            mAutoAdapter.setLoadEndResId(mLoadEndResId);
-            mAutoAdapter.setLoadErrorResId(mLoadErrorResId);
-            mRefreshableView.setAdapter(mAutoAdapter);
+        if (baseAdapter instanceof AutoBaseAdapter) {
+            mAutoBaseAdapter = (AutoBaseAdapter) baseAdapter;
+            mAutoBaseAdapter.setOnLastItemClickListener(mLastItemOnClickListener);
+            mAutoBaseAdapter.setAutoLoadResId(mAutoLoadResId);
+            mAutoBaseAdapter.setClickableResId(mClickableResId);
+            mAutoBaseAdapter.setLoadEndResId(mLoadEndResId);
+            mAutoBaseAdapter.setLoadErrorResId(mLoadErrorResId);
+            mRefreshableView.setAdapter(mAutoBaseAdapter);
         } else {
             throw new IllegalArgumentException("Adapter must be extends QuickAdapter or WrapAdapter");
         }
     }
 
     public boolean getAutoLoadUsable() {
-        return mAutoAdapter.getAutoLoadUsable();
+        return mAutoBaseAdapter.getAutoLoadUsable();
     }
 
     public void setAutoLoadUsable(boolean usable) {
-        if (getMode() == Mode.AUTO_LOAD || getMode() == Mode.BOTH) {
-            mAutoAdapter.setAutoLoadUsable(usable);
-        }
+        mAutoBaseAdapter.setAutoLoadUsable(usable);
     }
 
-    public boolean isAutoLoad() {
-        return mAutoAdapter.isAutoLoad();
+    public void setShowLoadEnd(boolean usable) {
+        mAutoBaseAdapter.setShowLoadEnd(usable);
     }
 
-    public void setAutoLoad(boolean autoLoad) {
-        mAutoAdapter.setAutoLoad(autoLoad);
+    public boolean isManualLoad() {
+        return mAutoBaseAdapter.isManualLoad();
+    }
+
+    public void setManualLoad(boolean autoLoad) {
+        mAutoBaseAdapter.setManualLoad(autoLoad);
     }
 
     public void setOnScrollListener(OnScrollListener listener) {
@@ -171,124 +171,82 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
         mOnAutoLoadListener = listener;
     }
 
-    private boolean isFirstItemVisible() {
-        final Adapter adapter = mRefreshableView.getAdapter();
-        if (null == adapter || adapter.isEmpty()) {
-            if (adapter instanceof HeaderViewListAdapter) {
-                if (mRefreshableView.getFirstVisiblePosition() == 0) {
-                    final View firstVisibleChild = mRefreshableView.getChildAt(0);
-                    if (firstVisibleChild != null) {
-                        return firstVisibleChild.getTop() >= mRefreshableView.getTop();
-                    }
-                }
-            }
-            return true;
-        } else {
-            if (mRefreshableView.getFirstVisiblePosition() == 0) {
-                final View firstVisibleChild = mRefreshableView.getChildAt(0);
-                if (firstVisibleChild != null) {
-                    return firstVisibleChild.getTop() >= mRefreshableView.getTop();
-                }
-            }
-        }
-        return false;
-    }
-
-    public boolean isLastItemVisible() {
-        final Adapter adapter = mRefreshableView.getAdapter();
-        if (null == adapter || adapter.isEmpty()) {
-            if (adapter instanceof HeaderViewListAdapter) {
-                final int lastVisiblePosition = mRefreshableView.getLastVisiblePosition();
-                final int count = mRefreshableView.getCount();
-                if (lastVisiblePosition == count - 1) {
-                    final int childIndex = lastVisiblePosition - mRefreshableView.getFirstVisiblePosition();
-                    final View lastVisibleChild = mRefreshableView.getChildAt(childIndex);
-                    if (lastVisibleChild != null) {
-                        return lastVisibleChild.getBottom() <= mRefreshableView.getBottom();
-                    }
-                }
-            }
-            return true;
-        } else {
-            final int lastVisiblePosition = mRefreshableView.getLastVisiblePosition();
-            final int count = mRefreshableView.getCount();
-            if (lastVisiblePosition == count - 1) {
-                final int childIndex = lastVisiblePosition - mRefreshableView.getFirstVisiblePosition();
-                final View lastVisibleChild = mRefreshableView.getChildAt(childIndex);
-                if (lastVisibleChild != null) {
-                    return lastVisibleChild.getBottom() <= mRefreshableView.getBottom();
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public void onRefreshComplete() {
-        super.onRefreshComplete();
-        resetLastItemView();
-    }
-
     @Override
     protected void checkBody() {
-        if (showEmpty && mAutoAdapter.isEmpty() && !mAutoAdapter.getAutoLoadUsable()) {
+        if (mShowEmptyLayout && !mAutoBaseAdapter.getAutoLoadUsable() &&
+                ((mCurrentLoadState == LoadState.RESET && mAutoBaseAdapter.isEmpty()) ||
+                (mCurrentLoadState == LoadState.LOADING_END && mAutoBaseAdapter.getCount() <= 1 && mAutoBaseAdapter.getLastItemViewType() == 1))) {
             crossFading(mEmptyLayout, mRefreshableView);
         } else {
             crossFading(mRefreshableView, mEmptyLayout);
         }
     }
 
-    public void onAutoLoadingComplete() {
-        onAutoLoadingComplete(true);
+    @Override
+    public void onLoadingDataComplete(boolean loadable) {
+        super.onLoadingDataComplete(loadable);
+        if (!loadable) {
+            mAutoBaseAdapter.setLoadEnd(true);
+            mAutoBaseAdapter.setLoadError(false);
+            mAutoBaseAdapter.setLoading(false);
+            mAutoBaseAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
-    public void onAutoLoadingComplete(boolean usable) {
-        super.onAutoLoadingComplete(usable);
-        if (usable) {
+    public void onRefreshComplete(boolean loadable) {
+        if(loadable) {
+            super.onRefreshComplete(true);
             resetLastItemView();
         } else {
-            if (isFirstItemVisible() && isLastItemVisible()) {
-                mAutoAdapter.setLoadEnd(false);
-                mAutoAdapter.setLoadError(false);
-                mAutoAdapter.setLoading(false);
-                mAutoAdapter.setAutoLoadUsable(false);
-            } else {
-                mAutoAdapter.setLoadEnd(true);
-                mAutoAdapter.setLoadError(false);
-                mAutoAdapter.setLoading(false);
-                mAutoAdapter.notifyDataSetChanged();
-            }
+            mAutoBaseAdapter.setLoadEnd(true);
+            mAutoBaseAdapter.setLoadError(false);
+            mAutoBaseAdapter.setLoading(false);
+            mAutoBaseAdapter.notifyDataSetChanged();
+            super.onRefreshComplete(false);
+        }
+    }
+
+    @Override
+    public void onAutoLoadingComplete(boolean loadable) {
+        super.onAutoLoadingComplete(loadable);
+        if (loadable) {
+            resetLastItemView();
+        } else {
+            mAutoBaseAdapter.setLoadEnd(true);
+            mAutoBaseAdapter.setLoadError(false);
+            mAutoBaseAdapter.setLoading(false);
+            mAutoBaseAdapter.notifyDataSetChanged();
         }
     }
 
     @Override
     public void onAutoLoadingError() {
         super.onAutoLoadingError();
-        mAutoAdapter.setLoadEnd(false);
-        mAutoAdapter.setLoadError(true);
-        mAutoAdapter.setLoading(false);
-        mAutoAdapter.notifyDataSetChanged();
+        mAutoBaseAdapter.setLoadEnd(false);
+        mAutoBaseAdapter.setLoadError(true);
+        mAutoBaseAdapter.setLoading(false);
+        mAutoBaseAdapter.notifyDataSetChanged();
     }
 
     private void resetLastItemView() {
-        if (mAutoAdapter.isLoadEnd() || mAutoAdapter.isLoadError()) {
-            mAutoAdapter.setLoadEnd(false);
-            mAutoAdapter.setLoadError(false);
-            mAutoAdapter.setLoading(false);
-            mAutoAdapter.notifyDataSetChanged();
+        if (mAutoBaseAdapter.isManualLoad() || mAutoBaseAdapter.isLoadEnd() || mAutoBaseAdapter.isLoadError()) {
+            mAutoBaseAdapter.setLoadEnd(false);
+            mAutoBaseAdapter.setLoadError(false);
+            mAutoBaseAdapter.setLoading(false);
+            mAutoBaseAdapter.notifyDataSetChanged();
         }
     }
 
     private View.OnClickListener mLastItemOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            setState(State.AUTO_LOADING);
-            if (!mAutoAdapter.isAutoLoad()) {
-                mAutoAdapter.setLoadEnd(false);
-                mAutoAdapter.setLoading(true);
-                mAutoAdapter.setLoadError(false);
-                mAutoAdapter.notifyDataSetChanged();
+            mCurrentLoadState = LoadState.AUTO_LOADING;
+            if (mAutoBaseAdapter.isManualLoad()) {
+                mAutoBaseAdapter.setLoadEnd(false);
+                mAutoBaseAdapter.setLoading(true);
+                mAutoBaseAdapter.setLoadError(false);
+                mAutoBaseAdapter.notifyDataSetChanged();
             } else {
                 resetLastItemView();
             }
