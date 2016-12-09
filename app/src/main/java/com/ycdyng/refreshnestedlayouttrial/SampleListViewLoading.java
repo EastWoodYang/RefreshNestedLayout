@@ -20,13 +20,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout;
-import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.widget.adapter.BaseAdapterHelper;
 import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
 
 import java.util.ArrayList;
 
-public class SampleListViewPullToRefresh extends AppCompatActivity {
+public class SampleListViewLoading extends AppCompatActivity {
 
     private RefreshNestedListViewLayout mRefresher;
 
@@ -37,11 +36,6 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        for (int i = 0; i < 20; i++) {
-            SampleModel sampleModel = new SampleModel();
-            sampleModel.setValues("ListView item_" + i);
-            mDataList.add(sampleModel);
-        }
         mQuickAdapter = new QuickAdapter<SampleModel>(this, R.layout.list_item, mDataList) {
 
             @Override
@@ -53,30 +47,24 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
         setContentView(R.layout.sample_list_view);
         mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
-        mRefresher.setOnRefreshListener(new RefreshNestedLayout.OnRefreshListener() {
 
-            @Override
-            public void onRefresh() {
-                handleRefreshingEvent();
-            }
-        });
-    }
-
-    private void handleRefreshingEvent() {
+        mRefresher.onLoadingDataStart();
         mRefresher.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mDataList.clear();
-                for (int i = 0; i < 30; i++) {
+                for (int i = 0; i < 20; i++) {
                     SampleModel sampleModel = new SampleModel();
-                    sampleModel.setValues("ListView item_" + i + "  add by pull-to-refresh");
+                    sampleModel.setValues("ListView item_" + i);
                     mDataList.add(sampleModel);
                 }
-
                 mQuickAdapter.notifyDataSetChanged();
-                mRefresher.onRefreshComplete(false);
+
+                // if DataSet empty, will show empty layout.
+                // if you set custom empty layout, will show it.
+
+                mRefresher.onLoadingDataComplete(false);
             }
-        }, 1500);
+        }, 3000);
     }
 
 }

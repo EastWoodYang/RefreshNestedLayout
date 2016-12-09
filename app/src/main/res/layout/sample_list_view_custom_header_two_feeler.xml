@@ -11,13 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:dividerHeight="12dp"
-        android:footerDividersEnabled="false"
-        android:headerDividersEnabled="false"
-        android:listSelector="@android:color/transparent"
-        android:scrollbarSize="@dimen/scrollbar_size"
-        android:scrollbarStyle="outsideOverlay"
-        android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
-        rnll:mode="disable"/>
+        rnll:mode="pullToRefresh"
+        rnll:refreshingDistance="32dp">
+
+        <com.ycdyng.refreshnestedlayouttrial.CustomHeaderLayoutTwoFeeler
+            android:id="@+id/header_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout>
 
 </LinearLayout>

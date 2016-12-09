@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout
-        xmlns:rll="http://schemas.android.com/apk/res-auto"
+        xmlns:rnll="http://schemas.android.com/apk/res-auto"
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        rll:mode="pullToRefresh" >
+        rnll:mode="disable">
 
         <com.ycdyng.refreshnestedlayout.kernel.RefreshListView
             android:id="@+id/refreshable_view"
@@ -19,8 +18,7 @@
             android:layout_height="match_parent"
             android:cacheColorHint="#00000000"
             android:background="#FFFFFF"
-            android:divider="@null"
-            android:dividerHeight="0dp"
+            android:dividerHeight="12dp"
             android:footerDividersEnabled="false"
             android:headerDividersEnabled="false"
             android:listSelector="@android:color/transparent"

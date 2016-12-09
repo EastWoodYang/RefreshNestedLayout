@@ -26,7 +26,7 @@ import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
 
 import java.util.ArrayList;
 
-public class SampleListViewPullToRefresh extends AppCompatActivity {
+public class SampleListViewCustomHeader extends AppCompatActivity {
 
     private RefreshNestedListViewLayout mRefresher;
 
@@ -50,7 +50,7 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
             }
         };
 
-        setContentView(R.layout.sample_list_view);
+        setContentView(R.layout.sample_list_view_custom_header); // add custom header layout
         mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
         mRefresher.setOnRefreshListener(new RefreshNestedLayout.OnRefreshListener() {
@@ -60,20 +60,13 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
                 handleRefreshingEvent();
             }
         });
+
     }
 
     private void handleRefreshingEvent() {
         mRefresher.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mDataList.clear();
-                for (int i = 0; i < 30; i++) {
-                    SampleModel sampleModel = new SampleModel();
-                    sampleModel.setValues("ListView item_" + i + "  add by pull-to-refresh");
-                    mDataList.add(sampleModel);
-                }
-
-                mQuickAdapter.notifyDataSetChanged();
                 mRefresher.onRefreshComplete(false);
             }
         }, 1500);

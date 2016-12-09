@@ -37,10 +37,8 @@ public class SampleListViewWithWrapAdapter extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sample_list_view_auto_load); // set autoLoad mode
-        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
 
-        for(int i = 0; i < 28; i++) {
+        for (int i = 0; i < 20; i++) {
             SampleModel sampleModel = new SampleModel();
             sampleModel.setValues("ListView item_" + i);
             mDataList.add(sampleModel);
@@ -48,32 +46,38 @@ public class SampleListViewWithWrapAdapter extends AppCompatActivity {
 
         mSampleAdapter = new SampleAdapter(this, mDataList);
         mWrapAdapter = new WrapAdapter<SampleAdapter>(mSampleAdapter);
-        mWrapAdapter.setAutoLoadResId(R.layout.loading_layout);
 
+        setContentView(R.layout.sample_list_view_auto_load); // set autoLoad mode
+        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mWrapAdapter);
         mRefresher.setOnAutoLoadListener(new RefreshNestedLayout.OnAutoLoadListener() {
             @Override
             public void onLoading() {
-                mRefresher.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < 20; i++) {
-                            SampleModel sampleMode = new SampleModel();
-                            sampleMode.setValues("ListView add item_" + i + " by Auto-Load");
-                            mDataList.add(sampleMode);
-                        }
-                        mWrapAdapter.notifyDataSetChanged();
-                        if (mAutoLoadCount < 5) {
-                            mAutoLoadCount++;
-                            mRefresher.onAutoLoadingComplete(true);
-                        } else {
-                            mRefresher.onAutoLoadingComplete(false);
-                        }
-                    }
-                }, 1500);
+                handleAutoLoadEvent();
             }
         });
+
         mRefresher.setAutoLoadUsable(true);
+    }
+
+    private void handleAutoLoadEvent() {
+        mRefresher.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 20; i++) {
+                    SampleModel sampleMode = new SampleModel();
+                    sampleMode.setValues("ListView add item_" + (20 * (mAutoLoadCount + 1) + i) + " by Auto-Load");
+                    mDataList.add(sampleMode);
+                }
+                mWrapAdapter.notifyDataSetChanged();
+                if (mAutoLoadCount < 5) {
+                    mAutoLoadCount++;
+                    mRefresher.onAutoLoadingComplete(true);
+                } else {
+                    mRefresher.onAutoLoadingComplete(false);
+                }
+            }
+        }, 1500);
     }
 
 }

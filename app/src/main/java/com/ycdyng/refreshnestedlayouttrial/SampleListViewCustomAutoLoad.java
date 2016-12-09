@@ -26,60 +26,77 @@ import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
 
 import java.util.ArrayList;
 
-public class SampleListViewCustomAutoLoadLayout extends AppCompatActivity {
+public class SampleListViewCustomAutoLoad extends AppCompatActivity {
 
     private RefreshNestedListViewLayout mRefresher;
 
     private QuickAdapter<SampleModel> mQuickAdapter;
     private ArrayList<SampleModel> mDataList = new ArrayList<SampleModel>();
-    private int autoLoadCount = 0;
+    private int mAutoLoadCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sample_list_view_auto_load); // set autoLoad mode
-        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
 
-        for(int i = 0; i < 28; i++) {
+        for (int i = 0; i < 20; i++) {
             SampleModel sampleMode = new SampleModel();
             sampleMode.setValues("ListView item_" + i);
             mDataList.add(sampleMode);
         }
-
-        mQuickAdapter = new QuickAdapter<SampleModel>(this, R.layout.list_item) {
+        mQuickAdapter = new QuickAdapter<SampleModel>(this, R.layout.list_item, mDataList) {
 
             @Override
             protected void convert(int position, BaseAdapterHelper helper, SampleModel item) {
                 helper.setText(R.id.textView1, item.getValues());
             }
         };
-        mQuickAdapter.setAutoLoadResId(R.layout.loading_layout);
-        mQuickAdapter.addAll(mDataList);
 
+        setContentView(R.layout.sample_list_view_custom_auto_load); // set auto load layout
+        // as well as below
+        // mQuickAdapter.setAutoLoadResId(R.layout.custom_auto_load_layout);
+        // mQuickAdapter.setClickableResId(R.layout.custom_clickable_layout);
+        // mQuickAdapter.setLoadEndResId(R.layout.custom_load_end_layout);
+        // mQuickAdapter.setLoadErrorResId(R.layout.custom_load_error_layout);
+
+        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
         mRefresher.setOnAutoLoadListener(new RefreshNestedLayout.OnAutoLoadListener() {
             @Override
             public void onLoading() {
-                mRefresher.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < 20; i++) {
-                            SampleModel sampleMode = new SampleModel();
-                            sampleMode.setValues("ListView add item_" + i + " by Auto-Load");
-                            mQuickAdapter.add(sampleMode);
-                        }
-                        mQuickAdapter.notifyDataSetChanged();
-                        if (autoLoadCount < 5) {
-                            autoLoadCount++;
-                            mRefresher.onAutoLoadingComplete(true);
-                        } else {
-                            mRefresher.onAutoLoadingComplete(false);
-                        }
-                    }
-                }, 1500);
+                handleAutoLoadEvent();
             }
         });
+
         mRefresher.setAutoLoadUsable(true);
+    }
+
+    private void handleAutoLoadEvent() {
+        mRefresher.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mAutoLoadCount == 0) {
+                    mAutoLoadCount++;
+                    mRefresher.onAutoLoadingError();
+                    return;
+                }
+
+                for (int i = 0; i < 20; i++) {
+                    SampleModel sampleMode = new SampleModel();
+                    sampleMode.setValues("ListView add item_" + (20 * (mAutoLoadCount + 1) + i) + " by Auto-Load");
+                    mDataList.add(sampleMode);
+                }
+                mQuickAdapter.notifyDataSetChanged();
+
+                if (mAutoLoadCount < 2) {
+                    mAutoLoadCount++;
+                    mRefresher.onAutoLoadingComplete(true);
+                } else {
+                    mRefresher.setShowLoadEnd(true);
+                    mRefresher.setAutoLoadUsable(false);
+                    mRefresher.onAutoLoadingComplete(false);
+                }
+            }
+        }, 1500);
     }
 
 }

@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical" >
 
     <com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout
         xmlns:rnll="http://schemas.android.com/apk/res-auto"
@@ -11,13 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:dividerHeight="12dp"
-        android:footerDividersEnabled="false"
-        android:headerDividersEnabled="false"
-        android:listSelector="@android:color/transparent"
-        android:scrollbarSize="@dimen/scrollbar_size"
-        android:scrollbarStyle="outsideOverlay"
-        android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
-        rnll:mode="disable"/>
+        rnll:mode="autoLoad"
+        rnll:autoLoadLayout="@layout/custom_auto_load_layout"
+        rnll:clickableLayout="@layout/custom_clickable_layout"
+        rnll:loadEndLayout="@layout/custom_load_end_layout"
+        rnll:loadErrorLayout="@layout/custom_load_error_layout" />
 
 </LinearLayout>

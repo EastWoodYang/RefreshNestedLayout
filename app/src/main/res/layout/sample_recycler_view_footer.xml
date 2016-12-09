@@ -9,7 +9,7 @@
         android:layout_height="match_parent"
         android:padding="16dp"
         android:gravity="center"
-        android:text="Header View"
+        android:text="Footer View"
         android:textColor="@color/colorPrimary"
         android:textSize="18dp"/>
 

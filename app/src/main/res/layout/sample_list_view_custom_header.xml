@@ -6,15 +6,15 @@
     android:orientation="vertical">
 
     <com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout
-        xmlns:rll="http://schemas.android.com/apk/res-auto"
+        xmlns:rnll="http://schemas.android.com/apk/res-auto"
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        rll:mode="pullToRefresh"
-        rll:refreshingDistance="46dp">
+        rnll:mode="pullToRefresh"
+        rnll:refreshingDistance="46dp">
 
-        <com.ycdyng.refreshlayouttrial.CustomHeaderLayout
+        <com.ycdyng.refreshnestedlayouttrial.CustomHeaderLayout
             android:id="@+id/header_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

@@ -26,10 +26,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,19 +109,8 @@ public class ListSamples extends AppCompatActivity {
             }
         }
 
-        Collections.sort(myData, NAME_COMPARATOR);
-
         return myData;
     }
-
-    private final static Comparator<Map<String, Object>> NAME_COMPARATOR =
-        new Comparator<Map<String, Object>>() {
-        private final Collator   collator = Collator.getInstance();
-
-        public int compare(Map<String, Object> map1, Map<String, Object> map2) {
-            return collator.compare(map1.get("title"), map2.get("title"));
-        }
-    };
 
     protected Intent activityIntent(String pkg, String componentName) {
         Intent result = new Intent();

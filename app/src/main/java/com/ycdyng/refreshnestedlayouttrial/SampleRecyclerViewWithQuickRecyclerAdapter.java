@@ -26,7 +26,7 @@ import com.ycdyng.refreshnestedlayout.widget.adapter.RecyclerAdapterHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SampleRecyclerViewWithDivider extends AppCompatActivity {
+public class SampleRecyclerViewWithQuickRecyclerAdapter extends AppCompatActivity {
 
     private RefreshNestedRecyclerViewLayout mRefresher;
     private QuickRecyclerAdapter<SampleModel> mQuickRecyclerAdapter;
@@ -36,9 +36,9 @@ public class SampleRecyclerViewWithDivider extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        for(int i = 0; i < 28; i++) {
+        for (int i = 0; i < 20; i++) {
             SampleModel sampleMode = new SampleModel();
-            sampleMode.setValues("RecyclerView item_"+i);
+            sampleMode.setValues("RecyclerView item_" + i);
             mDataList.add(sampleMode);
         }
 
@@ -48,9 +48,10 @@ public class SampleRecyclerViewWithDivider extends AppCompatActivity {
                 helper.setText(R.id.textView1, item.getValues());
             }
         };
-        setContentView(R.layout.sample_recycler_view_with_divider); // set disableDivider false
+
+        setContentView(R.layout.sample_recycler_view);
         mRefresher = (RefreshNestedRecyclerViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickRecyclerAdapter);
-        //or mRefresher.addItemDecoration();
     }
+
 }

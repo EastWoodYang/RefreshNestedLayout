@@ -20,13 +20,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout;
-import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.widget.adapter.BaseAdapterHelper;
 import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
 
 import java.util.ArrayList;
 
-public class SampleListViewPullToRefresh extends AppCompatActivity {
+public class SampleListViewCustomLoading extends AppCompatActivity {
 
     private RefreshNestedListViewLayout mRefresher;
 
@@ -37,11 +36,6 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        for (int i = 0; i < 20; i++) {
-            SampleModel sampleModel = new SampleModel();
-            sampleModel.setValues("ListView item_" + i);
-            mDataList.add(sampleModel);
-        }
         mQuickAdapter = new QuickAdapter<SampleModel>(this, R.layout.list_item, mDataList) {
 
             @Override
@@ -50,33 +44,38 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
             }
         };
 
-        setContentView(R.layout.sample_list_view);
+        setContentView(R.layout.sample_list_view_custom_loading); // set loading layout and empty layout
+        // or mRefresher.setLoadingLayoutResId(int resId);
+        // or mRefresher.setLoadingView(View loadingView);
+
+        // or mRefresher.setEmptyLayoutResId(int resId);
+        // or mRefresher.setEmptyView(View emptyView);
+
+        // also can change empty view content by call mRefresher.setEmptyContent().
+
         mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
-        mRefresher.setOnRefreshListener(new RefreshNestedLayout.OnRefreshListener() {
 
-            @Override
-            public void onRefresh() {
-                handleRefreshingEvent();
-            }
-        });
+        mRefresher.onLoadingDataStart();
+        handleLoadingDataEvent();
     }
 
-    private void handleRefreshingEvent() {
+    private void handleLoadingDataEvent() {
         mRefresher.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mDataList.clear();
-                for (int i = 0; i < 30; i++) {
-                    SampleModel sampleModel = new SampleModel();
-                    sampleModel.setValues("ListView item_" + i + "  add by pull-to-refresh");
-                    mDataList.add(sampleModel);
+                for (int i = 0; i < 20; i++) {
+                    SampleModel sampleMode = new SampleModel();
+                    sampleMode.setValues("ListView item_" + i);
+                    mDataList.add(sampleMode);
                 }
-
                 mQuickAdapter.notifyDataSetChanged();
-                mRefresher.onRefreshComplete(false);
+
+                // if mDataList is empty, will show custom empty layout.
+
+                mRefresher.onLoadingDataComplete(false);
             }
-        }, 1500);
+        }, 3000);
     }
 
 }

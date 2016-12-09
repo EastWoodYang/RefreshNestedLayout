@@ -16,19 +16,37 @@
 
 package com.ycdyng.refreshnestedlayouttrial;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 
 import com.ycdyng.refreshnestedlayout.RefreshNestedScrollViewLayout;
+import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 
-public class SampleScrollViewDefault extends Activity {
+public class SampleScrollViewPullToRefresh extends AppCompatActivity {
 
     private RefreshNestedScrollViewLayout mRefresher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sample_scroll_view_default);
+        setContentView(R.layout.sample_scroll_view_pull_to_refresh);
         mRefresher = (RefreshNestedScrollViewLayout) findViewById(R.id.refresh_layout);
+        mRefresher.setOnRefreshListener(new RefreshNestedLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                handleRefreshingEvent();
+            }
+        });
+    }
+
+    private void handleRefreshingEvent() {
+        mRefresher.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                mRefresher.onRefreshComplete(false);
+            }
+        }, 1500);
     }
 }

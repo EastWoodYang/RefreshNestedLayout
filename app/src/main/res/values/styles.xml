@@ -10,4 +10,11 @@
         <item name="android:textColorSecondary">#FFFFFF</item>
     </style>
 
+    <style name="ProgressBarAutoLoading" parent="@android:style/Widget.ProgressBar.Small">
+        <item name="android:indeterminate">true</item>
+        <item name="android:indeterminateBehavior">repeat</item>
+        <item name="android:indeterminateDrawable">@drawable/rotate_progress_bar_auto_loading</item>
+        <item name="android:indeterminateDuration">1000</item>
+    </style>
+
 </resources>

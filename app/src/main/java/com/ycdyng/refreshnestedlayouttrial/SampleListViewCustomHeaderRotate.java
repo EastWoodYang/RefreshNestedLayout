@@ -26,64 +26,49 @@ import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
 
 import java.util.ArrayList;
 
-public class SampleListViewCustomRefreshHeader extends AppCompatActivity {
+public class SampleListViewCustomHeaderRotate extends AppCompatActivity {
 
     private RefreshNestedListViewLayout mRefresher;
 
     private QuickAdapter<SampleModel> mQuickAdapter;
     private ArrayList<SampleModel> mDataList = new ArrayList<SampleModel>();
-    private int mRefreshCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sample_list_view_custom_header); // add custom header
-        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
 
-        for(int i = 0; i < 28; i++) {
+        for (int i = 0; i < 20; i++) {
             SampleModel sampleModel = new SampleModel();
             sampleModel.setValues("ListView item_" + i);
             mDataList.add(sampleModel);
         }
-
-        mQuickAdapter = new QuickAdapter<SampleModel>(this, R.layout.list_item) {
+        mQuickAdapter = new QuickAdapter<SampleModel>(this, R.layout.list_item, mDataList) {
 
             @Override
             protected void convert(int position, BaseAdapterHelper helper, SampleModel item) {
                 helper.setText(R.id.textView1, item.getValues());
             }
         };
-        mQuickAdapter.addAll(mDataList);
 
+        setContentView(R.layout.sample_list_view_custom_header_rotate); // add custom header layout
+        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
         mRefresher.setOnRefreshListener(new RefreshNestedLayout.OnRefreshListener() {
 
             @Override
             public void onRefresh() {
-                mRefresher.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(mRefreshCount >= 5) {
-                            mRefresher.setRefreshUsable(false); // disable pull-to-refresh
-                            mRefresher.onRefreshComplete();
-                            return;
-                        }
-                        mRefreshCount++;
-
-                        mQuickAdapter.clear();
-                        ArrayList<String> items = new ArrayList<String>();
-                        for (int i = 0; i < 30; i++) {
-                            SampleModel sampleModel = new SampleModel();
-                            sampleModel.setValues("ListView add item_" + i + " by Pull-To-Refresh");
-                            mQuickAdapter.add(sampleModel);
-                        }
-                        mQuickAdapter.notifyDataSetChanged();
-                        mRefresher.onRefreshComplete();
-                    }
-                }, 1500);
+                handleRefreshingEvent();
             }
         });
+    }
 
+    private void handleRefreshingEvent() {
+        mRefresher.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mRefresher.onRefreshComplete(false);
+            }
+        }, 1500);
     }
 
 }

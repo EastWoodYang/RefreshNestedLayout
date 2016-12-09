@@ -26,7 +26,7 @@ import android.view.View;
 
 import com.ycdyng.refreshnestedlayout.RefreshNestedScrollViewLayout;
 
-public class SampleScrollViewNested extends Activity implements View.OnTouchListener {
+public class SampleScrollViewAppBar extends Activity implements View.OnTouchListener {
 
     private CoordinatorLayout mCoordinatorLayout;
     private AppBarLayout mAppBarLayout;
@@ -37,7 +37,7 @@ public class SampleScrollViewNested extends Activity implements View.OnTouchList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.sample_scroll_view_nested);
+        setContentView(R.layout.sample_scroll_view_app_bar);
         mRefresher = (RefreshNestedScrollViewLayout) findViewById(R.id.refresh_layout);
 
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);

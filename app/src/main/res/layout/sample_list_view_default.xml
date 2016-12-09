@@ -1,44 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
     <com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        app:emptyLayout="@layout/custom_body_empty_layout" >
-
-        <!--<com.ycdyng.refreshnestedlayout.kernel.RefreshLoadingLayout-->
-            <!--android:id="@+id/loading_layout"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent" >-->
-
-            <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:gravity="center"-->
-                <!--android:text="this is a custom Loading layout"/>-->
-
-        <!--</com.ycdyng.refreshnestedlayout.kernel.RefreshLoadingLayout>-->
-
-        <!--<com.ycdyng.refreshnestedlayout.kernel.RefreshEmptyLayout-->
-            <!--android:id="@+id/empty_layout"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent" >-->
-
-            <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:gravity="center"-->
-                <!--android:text="this is a custom empty layout"/>-->
-
-        <!--</com.ycdyng.refreshnestedlayout.kernel.RefreshEmptyLayout>-->
-
-    </com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout>
+        android:layout_weight="1" />
 
 </LinearLayout>

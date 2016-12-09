@@ -4,7 +4,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -18,8 +18,17 @@
 
         <!-- REFRESH LIST VIEW -->
         <activity
-            android:name=".SampleListViewDefault"
-            android:label="ListView/Default">
+            android:name=".SampleListViewPullToRefresh"
+            android:label="ListView/pull to refresh">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".SampleListViewLoading"
+            android:label="ListView/loading">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -28,7 +37,7 @@
 
         <activity
             android:name=".SampleListViewAutoLoad"
-            android:label="ListView/AutoLoad">
+            android:label="ListView/auto load">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -37,7 +46,7 @@
 
         <activity
             android:name=".SampleListViewManualLoad"
-            android:label="ListView/ManualLoad">
+            android:label="ListView/manual load">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -45,8 +54,8 @@
         </activity>
 
         <activity
-            android:name=".SampleListViewCustomAutoLoadLayout"
-            android:label="ListView/Custom AutoLoad Layout">
+            android:name=".SampleListViewAppBar"
+            android:label="ListView/with AppBarLayout (API >= 21)" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -54,8 +63,8 @@
         </activity>
 
         <activity
-            android:name=".SampleListViewPullToRefresh"
-            android:label="ListView/PullToRefresh">
+            android:name=".SampleListViewWithWrapAdapter"
+            android:label="ListView/using WrapAdapter">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -63,8 +72,44 @@
         </activity>
 
         <activity
-            android:name=".SampleListViewCustomRefreshHeader"
-            android:label="ListView/Custom Refresh Header">
+            android:name=".SampleListViewCustomLoading"
+            android:label="ListView/custom loading layout">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".SampleListViewCustomHeader"
+            android:label="ListView/custom refresh header 1">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".SampleListViewCustomHeaderTwoFeeler"
+            android:label="ListView/custom refresh header 2">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".SampleListViewCustomHeaderRotate"
+            android:label="ListView/custom refresh header 3">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".SampleListViewCustomAutoLoad"
+            android:label="ListView/custom auto-load layout">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -89,28 +134,10 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".SampleListViewWithWrapAdapter"
-            android:label="ListView/With WrapAdapter">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".SampleListViewNested"
-            android:label="ListView/Nested(SDK>=21)" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
-            </intent-filter>
-        </activity>
-
         <!-- REFRESH RECYCLER VIEW -->
         <activity
-            android:name=".SampleRecyclerViewDefault"
-            android:label="RecyclerView/Default">
+            android:name=".SampleRecyclerViewWithQuickRecyclerAdapter"
+            android:label="RecyclerView/using QuickRecyclerAdapter">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -118,8 +145,8 @@
         </activity>
 
         <activity
-            android:name=".SampleRecyclerViewAutoLoad"
-            android:label="RecyclerView/AutoLoad">
+            android:name=".SampleRecyclerViewWithQuickRecyclerMultiAdapter"
+            android:label="RecyclerView/using QuickRecyclerMultiAdapter" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -127,8 +154,8 @@
         </activity>
 
         <activity
-            android:name=".SampleRecyclerViewManualLoad"
-            android:label="RecyclerView/ManualLoad">
+            android:name=".SampleRecyclerViewWithWrapRecyclerAdapter"
+            android:label="RecyclerView/using WrapRecyclerAdapter" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -136,8 +163,8 @@
         </activity>
 
         <activity
-            android:name=".SampleRecyclerViewCustomAutoLoadLayout"
-            android:label="RecyclerView/Custom AutoLoad Layout">
+            android:name=".SampleRecyclerViewAppBar"
+            android:label="RecyclerView/with AppBarLayout" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -145,44 +172,8 @@
         </activity>
 
         <activity
-            android:name=".SampleRecyclerViewPullToRefresh"
-            android:label="RecyclerView/PullToRefresh">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".SampleRecyclerViewCustomRefreshHeader"
-            android:label="RecyclerView/Custom Refresh Header">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".SampleRecyclerViewRefreshableViewAttr_1"
-            android:label="RecyclerView/Refreshable View AttributeSet 1">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".SampleRecyclerViewRefreshableViewAttr_2"
-            android:label="RecyclerView/Refreshable View AttributeSet 2">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".SampleRecyclerViewWithHeaderView"
-            android:label="RecyclerView/With Header View">
+            android:name=".SampleRecyclerViewWithHeaderViewAndFooterView"
+            android:label="RecyclerView/with header view and footer view">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -191,16 +182,7 @@
 
         <activity
             android:name=".SampleRecyclerViewWithDivider"
-            android:label="RecyclerView/With Divider">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".SampleRecyclerViewNested"
-            android:label="RecyclerView/Nested" >
+            android:label="RecyclerView/with divider">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -209,8 +191,8 @@
 
         <!-- REFRESH SCROLL VIEW -->
         <activity
-            android:name=".SampleScrollViewDefault"
-            android:label="ScrollView/Default" >
+            android:name=".SampleScrollViewPullToRefresh"
+            android:label="ScrollView/pull to refresh" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
@@ -218,8 +200,17 @@
         </activity>
 
         <activity
-            android:name=".SampleScrollViewNested"
-            android:label="ScrollView/Nested" >
+            android:name=".SampleScrollViewLoading"
+            android:label="ScrollView/loading" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".SampleScrollViewAppBar"
+            android:label="ScrollView/with AppBarLayout" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />

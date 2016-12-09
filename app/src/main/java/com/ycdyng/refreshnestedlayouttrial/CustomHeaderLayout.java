@@ -28,8 +28,7 @@ public class CustomHeaderLayout extends RefreshHeaderLayout {
     private AnimationDrawable mAnimationDrawable;
 
     public CustomHeaderLayout(Context context) {
-        super(context);
-        init(context, null);
+        this(context, null);
     }
 
     public CustomHeaderLayout(Context context, AttributeSet attrs) {

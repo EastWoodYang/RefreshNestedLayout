@@ -19,18 +19,18 @@ package com.ycdyng.refreshnestedlayouttrial;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout;
-import com.ycdyng.refreshnestedlayout.widget.adapter.BaseAdapterHelper;
-import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
+import com.ycdyng.refreshnestedlayout.RefreshNestedRecyclerViewLayout;
+import com.ycdyng.refreshnestedlayout.widget.adapter.WrapRecyclerAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class SampleListViewRefreshableViewAttr_1 extends AppCompatActivity {
+public class SampleRecyclerViewWithWrapRecyclerAdapter extends AppCompatActivity {
 
-    private RefreshNestedListViewLayout mRefresher;
-
-    private QuickAdapter<SampleModel> mQuickAdapter;
-    private ArrayList<SampleModel> mDataList = new ArrayList<SampleModel>();
+    private RefreshNestedRecyclerViewLayout mRefresher;
+    private SampleRecyclerAdapter mSimpleAdapter;
+    private WrapRecyclerAdapter<SampleRecyclerAdapter> mWrapRecyclerAdapter;
+    private List<SampleModel> mDataList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,17 +41,12 @@ public class SampleListViewRefreshableViewAttr_1 extends AppCompatActivity {
             sampleModel.setValues("ListView item_" + i);
             mDataList.add(sampleModel);
         }
-        mQuickAdapter = new QuickAdapter<SampleModel>(this, R.layout.list_item, mDataList) {
 
-            @Override
-            protected void convert(int position, BaseAdapterHelper helper, SampleModel item) {
-                helper.setText(R.id.textView1, item.getValues());
-            }
-        };
+        mSimpleAdapter = new SampleRecyclerAdapter(this, mDataList);
+        mWrapRecyclerAdapter = new WrapRecyclerAdapter<>(mSimpleAdapter);
 
-        setContentView(R.layout.sample_list_view_refreshable_view_attr_1); // set refreshable_view AttributeSet
-        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
-        mRefresher.setAdapter(mQuickAdapter);
+        setContentView(R.layout.sample_recycler_view);
+        mRefresher = (RefreshNestedRecyclerViewLayout) findViewById(R.id.refresh_layout);
+        mRefresher.setAdapter(mWrapRecyclerAdapter);
     }
-
 }
