@@ -13,6 +13,7 @@
         android:layout_weight="1"
         rnll:mode="pullToRefresh">
 
+        <!-- CustomHeaderLayoutRotate's id must be header_view -->
         <com.ycdyng.refreshnestedlayouttrial.CustomHeaderLayoutRotate
             android:id="@+id/header_view"
             android:layout_width="match_parent"

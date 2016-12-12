@@ -74,7 +74,7 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
                 }
 
                 mQuickAdapter.notifyDataSetChanged();
-                mRefresher.onRefreshComplete(false);
+                mRefresher.onRefreshComplete();
             }
         }, 1500);
     }

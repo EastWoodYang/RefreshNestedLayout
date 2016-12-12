@@ -1057,7 +1057,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         // Finish the spinner for nested scrolling if we ever consumed any
         // unconsumed nested scroll
         if (mTotalUnconsumed != 0) {
-            finishHeader(mTotalUnconsumed);
+            finishHeader(mTotalUnconsumed * DRAG_RATE);
             mTotalUnconsumed = 0;
         }
         // Dispatch up our nested parent

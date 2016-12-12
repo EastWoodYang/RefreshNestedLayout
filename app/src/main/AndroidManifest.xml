@@ -189,6 +189,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".SampleRecyclerViewItemListener"
+            android:label="RecyclerView/set item listener">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
         <!-- REFRESH SCROLL VIEW -->
         <activity
             android:name=".SampleScrollViewPullToRefresh"

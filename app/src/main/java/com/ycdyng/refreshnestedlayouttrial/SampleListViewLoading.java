@@ -62,7 +62,7 @@ public class SampleListViewLoading extends AppCompatActivity {
                 // if DataSet empty, will show empty layout.
                 // if you set custom empty layout, will show it.
 
-                mRefresher.onLoadingDataComplete(false);
+                mRefresher.onLoadingDataComplete();
             }
         }, 3000);
     }

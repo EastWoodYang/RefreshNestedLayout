@@ -18,13 +18,11 @@ package com.ycdyng.refreshnestedlayouttrial;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
 
 import com.ycdyng.refreshnestedlayout.RefreshNestedRecyclerViewLayout;
-import com.ycdyng.refreshnestedlayout.kernel.RefreshRecyclerView;
 import com.ycdyng.refreshnestedlayout.widget.adapter.QuickRecyclerAdapter;
 import com.ycdyng.refreshnestedlayout.widget.adapter.RecyclerAdapterHelper;
 
@@ -41,12 +39,6 @@ public class SampleRecyclerViewWithHeaderViewAndFooterView extends AppCompatActi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        for (int i = 0; i < 28; i++) {
-            SampleModel sampleMode = new SampleModel();
-            sampleMode.setValues("RecyclerView item_" + i);
-            mDataList.add(sampleMode);
-        }
-
         for (int i = 0; i < 20; i++) {
             SampleModel sampleMode = new SampleModel();
             sampleMode.setValues("RecyclerView item_" + i);
@@ -60,7 +52,7 @@ public class SampleRecyclerViewWithHeaderViewAndFooterView extends AppCompatActi
             }
         };
 
-        View headerView = LayoutInflater.from(this).inflate(R.layout.sample_recycler_view_header, null);
+        View headerView = LayoutInflater.from(this).inflate(R.layout.item_recycler_view_header, null);
         headerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,7 +61,7 @@ public class SampleRecyclerViewWithHeaderViewAndFooterView extends AppCompatActi
         });
         mQuickRecyclerAdapter.addHeader(headerView);
 
-        View footerView = LayoutInflater.from(this).inflate(R.layout.sample_recycler_view_footer, null);
+        View footerView = LayoutInflater.from(this).inflate(R.layout.item_recycler_view_footer, null);
         footerView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,13 +73,6 @@ public class SampleRecyclerViewWithHeaderViewAndFooterView extends AppCompatActi
         setContentView(R.layout.sample_recycler_view);
         mRefresher = (RefreshNestedRecyclerViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickRecyclerAdapter);
-
-        mRefresher.getRefreshableView().setOnItemClickListener(new RefreshRecyclerView.OnItemClickListener() {
-            @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Toast.makeText(getApplicationContext(), "position: " + position, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
 }

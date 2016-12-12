@@ -66,7 +66,7 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
                 refreshHeaderLayout = (RefreshHeaderLayout) headerView;
                 refreshHeaderLayout.setHeight(0);  // hidden
             } else {
-                throw new IllegalArgumentException("Header View must be extended BaseHeaderLayout");
+                throw new IllegalArgumentException("Header View must be extended RefreshHeaderLayout");
             }
         } else {
             refreshHeaderLayout = new DefaultHeaderLayout(context);
@@ -216,6 +216,10 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
         }
     }
 
+    public void onLoadingDataComplete() {
+        this.onLoadingDataComplete(false);
+    }
+
     @Override
     public void onLoadingDataComplete(boolean loadable) {
         super.onLoadingDataComplete(loadable);
@@ -225,6 +229,10 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
             mAutoRecyclerAdapter.setLoading(false);
             mAutoRecyclerAdapter.notifyItemChanged(mAutoRecyclerAdapter.getItemCount());
         }
+    }
+
+    public void onRefreshComplete() {
+        this.onRefreshComplete(false);
     }
 
     @Override

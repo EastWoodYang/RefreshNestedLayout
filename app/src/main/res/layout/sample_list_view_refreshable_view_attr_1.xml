@@ -12,6 +12,7 @@
         android:layout_weight="1"
         rnll:mode="disable">
 
+        <!-- RefreshListView's id must be refreshable_view -->
         <com.ycdyng.refreshnestedlayout.kernel.RefreshListView
             android:id="@+id/refreshable_view"
             android:layout_width="match_parent"

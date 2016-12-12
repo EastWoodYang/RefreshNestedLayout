@@ -36,7 +36,9 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
+        <!-- NestedScrollView's id must be empty_layout -->
         <android.support.v4.widget.NestedScrollView
+            android:id="@+id/refreshable_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 

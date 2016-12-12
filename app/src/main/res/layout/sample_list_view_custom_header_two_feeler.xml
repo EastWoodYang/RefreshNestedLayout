@@ -14,6 +14,7 @@
         rnll:mode="pullToRefresh"
         rnll:refreshingDistance="32dp">
 
+        <!-- CustomHeaderLayoutTwoFeeler's id must be header_view -->
         <com.ycdyng.refreshnestedlayouttrial.CustomHeaderLayoutTwoFeeler
             android:id="@+id/header_view"
             android:layout_width="match_parent"

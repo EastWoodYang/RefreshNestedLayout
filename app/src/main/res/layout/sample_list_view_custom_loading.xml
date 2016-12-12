@@ -15,6 +15,7 @@
         rnll:emptyLayout="@layout/custom_empty_layout"
         rnll:mode="disable">
 
+        <!-- RefreshLoadingLayout's id must be loading_layout -->
         <!--<com.ycdyng.refreshnestedlayout.kernel.RefreshLoadingLayout-->
             <!--android:id="@+id/loading_layout"-->
             <!--android:layout_width="match_parent"-->
@@ -27,7 +28,8 @@
                 <!--android:text="THIS IS A CUSTOM LOADING LAYOUT"/>-->
             <!---->
         <!--</com.ycdyng.refreshnestedlayout.kernel.RefreshLoadingLayout>-->
-        <!---->
+
+        <!-- RefreshEmptyLayout's id must be empty_layout -->
         <!--<com.ycdyng.refreshnestedlayout.kernel.RefreshEmptyLayout-->
             <!--android:id="@+id/empty_layout"-->
             <!--android:layout_width="match_parent"-->

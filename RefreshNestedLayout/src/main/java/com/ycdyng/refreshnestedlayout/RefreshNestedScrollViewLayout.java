@@ -50,7 +50,7 @@ public class RefreshNestedScrollViewLayout extends RefreshNestedLayout<NestedScr
                 refreshHeaderLayout = (RefreshHeaderLayout) headerView;
                 refreshHeaderLayout.setHeight(0);  // hidden
             } else {
-                throw new IllegalArgumentException("Header View must be extended BaseHeaderLayout");
+                throw new IllegalArgumentException("Header View must be extended RefreshHeaderLayout");
             }
         } else {
             refreshHeaderLayout = new DefaultHeaderLayout(context);
