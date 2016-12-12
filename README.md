@@ -3,13 +3,13 @@ This project aims to provide a powerful and convenient widget for Android, inclu
 
 # Features
 * Supports Pull-To-Refresh, Auto-Load and First-Screen-Loading.
-* Easy to replace refresh head view.
+* **Easy to custom your refresh head view**.
 * Customizable layout, e.g. loading Layout, empty layout, auto-load Layout and so on.
 * Currently works with **ListView**, **RecycleView** and **ScrollView**, also behave well in **CoordinatorLayout**.
 * Two modes of data adapter: Quick and Wrap, like **QuickAdapter** or **WrapAdapter**.
 
-# Sample Application
-DownLoad and run it. (I know it's a bad experience.)
+# Dome
+<font color=#A10000>DownLoad and run it.</font> (I know it's a bad experience)
 
 # Usage
 
