@@ -148,7 +148,7 @@ mWrapAdapter = new WrapAdapter<SampleAdapter>(mSampleAdapter);
 
 ...
 
-mRefreshLayout.setAdapter(mQuickAdapter);
+mRefreshLayout.setAdapter(mWrapAdapter);
 
 ...
 ```
