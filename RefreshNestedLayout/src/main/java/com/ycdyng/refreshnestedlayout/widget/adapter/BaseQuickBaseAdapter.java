@@ -65,7 +65,7 @@ public abstract class BaseQuickBaseAdapter<T, H extends BaseAdapterHelper> exten
 
     @Override
     public int getCount() {
-        int extra = autoLoadUsable || (loadEnd && showLoadEnd) ? 1 : 0;
+        int extra = autoLoadUsable || (showNoMoreDataItem && loadEnd) ? 1 : 0;
         return data.size() + extra;
     }
 

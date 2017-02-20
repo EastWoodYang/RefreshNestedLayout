@@ -140,7 +140,7 @@ public class SampleListViewAppBar extends Activity implements View.OnTouchListen
                     mAutoLoadCount++;
                     mRefresher.onAutoLoadingComplete(true);
                 } else {
-                    mRefresher.setShowLoadEnd(true);
+                    mRefresher.setShowNoMoreDataItem(true);
                     mRefresher.setAutoLoadUsable(false);
                     mRefresher.onAutoLoadingComplete(false);
                 }

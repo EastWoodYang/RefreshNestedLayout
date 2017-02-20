@@ -48,7 +48,7 @@ public class SampleListViewLoading extends AppCompatActivity {
         mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
 
-        mRefresher.onLoadingDataStart();
+        mRefresher.onLoadingStart();
         mRefresher.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -62,7 +62,7 @@ public class SampleListViewLoading extends AppCompatActivity {
                 // if DataSet empty, will show empty layout.
                 // if you set custom empty layout, will show it.
 
-                mRefresher.onLoadingDataComplete();
+                mRefresher.onLoadingComplete();
             }
         }, 3000);
     }

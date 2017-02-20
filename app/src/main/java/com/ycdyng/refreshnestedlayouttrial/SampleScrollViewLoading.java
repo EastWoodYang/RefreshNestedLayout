@@ -31,11 +31,11 @@ public class SampleScrollViewLoading extends AppCompatActivity {
         setContentView(R.layout.sample_scroll_view_pull_to_refresh);
         mRefresher = (RefreshNestedScrollViewLayout) findViewById(R.id.refresh_layout);
 
-        mRefresher.onLoadingDataStart();
+        mRefresher.onLoadingStart();
         mRefresher.postDelayed(new Runnable() {
             @Override
             public void run() {
-                mRefresher.onLoadingDataComplete();
+                mRefresher.onLoadingComplete();
             }
         }, 3000);
     }

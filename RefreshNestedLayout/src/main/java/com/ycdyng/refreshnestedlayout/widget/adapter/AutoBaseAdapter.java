@@ -30,7 +30,7 @@ public abstract class AutoBaseAdapter extends BaseAdapter {
     protected boolean loadEnd;
     protected boolean loading;
 
-    protected boolean showLoadEnd;
+    protected boolean showNoMoreDataItem = true;
 
     protected int autoLoadResId;
     protected int clickableResId;
@@ -108,12 +108,12 @@ public abstract class AutoBaseAdapter extends BaseAdapter {
         this.loading = loading;
     }
 
-    public boolean isShowLoadEnd() {
-        return showLoadEnd;
+    public boolean isShowNoMoreDataItem() {
+        return showNoMoreDataItem;
     }
 
-    public void setShowLoadEnd(boolean showLoadEnd) {
-        this.showLoadEnd = showLoadEnd;
+    public void setShowNoMoreDataItem(boolean showNoMoreDataItem) {
+        this.showNoMoreDataItem = showNoMoreDataItem;
     }
 
     public void setAutoLoadResId(int resId) {

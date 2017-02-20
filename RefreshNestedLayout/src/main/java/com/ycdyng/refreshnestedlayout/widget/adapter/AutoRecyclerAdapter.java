@@ -37,7 +37,7 @@ public abstract class AutoRecyclerAdapter<VH extends RecyclerView.ViewHolder> ex
     protected boolean loadEnd;
     protected boolean loading;
 
-    protected boolean showLoadEnd;
+    protected boolean showNoMoreDataItem = true;
 
     protected int autoLoadResId;
     protected int clickableResId;
@@ -61,7 +61,7 @@ public abstract class AutoRecyclerAdapter<VH extends RecyclerView.ViewHolder> ex
 
     @Override
     public int getItemCount() {
-        int extra = autoLoadUsable || (loadEnd && showLoadEnd) ? 1 : 0;
+        int extra = autoLoadUsable || (showNoMoreDataItem && loadEnd) ? 1 : 0;
         return mHeaders.size() + getBodyCount() + mFooters.size() + extra;
     }
 
@@ -74,7 +74,7 @@ public abstract class AutoRecyclerAdapter<VH extends RecyclerView.ViewHolder> ex
             onBodyBindViewHolder(viewHolder, position - mHeaders.size());
         } else {
             // Footers don't need anything special
-            if ((autoLoadUsable || (loadEnd && showLoadEnd)) && position + 1 == getItemCount()) {
+            if ((autoLoadUsable || (showNoMoreDataItem && loadEnd)) && position + 1 == getItemCount()) {
                 if (loadError) {
                     viewHolder.itemView.setOnClickListener(mOnLastItemClickListener);
                 } else if (loadEnd) {
@@ -99,7 +99,7 @@ public abstract class AutoRecyclerAdapter<VH extends RecyclerView.ViewHolder> ex
         } else if (position < (mHeaders.size() + getBodyCount())) {
             return getBodyItemViewType(position - mHeaders.size());
         } else {
-            if ((autoLoadUsable || (loadEnd && showLoadEnd)) && position + 1 == getItemCount()) {
+            if ((autoLoadUsable || (showNoMoreDataItem && loadEnd)) && position + 1 == getItemCount()) {
                 if (loadError) {
                     return ERROR_VIEW_TYPE;
                 } else if (loadEnd) {
@@ -253,12 +253,12 @@ public abstract class AutoRecyclerAdapter<VH extends RecyclerView.ViewHolder> ex
         this.loading = loading;
     }
 
-    public boolean isShowLoadEnd() {
-        return showLoadEnd;
+    public boolean isShowNoMoreDataItem() {
+        return showNoMoreDataItem;
     }
 
-    public void setShowLoadEnd(boolean showLoadEnd) {
-        this.showLoadEnd = showLoadEnd;
+    public void setShowNoMoreDataItem(boolean showNoMoreDataItem) {
+        this.showNoMoreDataItem = showNoMoreDataItem;
     }
 
     public void setAutoLoadResId(int resId) {

@@ -100,8 +100,6 @@ public class ObservableRecyclerView extends RecyclerView {
                     // simply returning false here may cause subView's click,
                     // so delegate it to super.
                     return super.onTouchEvent(ev);
-                } else {
-                    Log.d("onTouchEvent", "diffY: " + diffY);
                 }
                 break;
         }

@@ -29,7 +29,6 @@ import com.ycdyng.refreshnestedlayout.kernel.RefreshHeaderLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshRecyclerView;
 import com.ycdyng.refreshnestedlayout.widget.adapter.AutoRecyclerAdapter;
-import com.ycdyng.refreshnestedlayout.widget.adapter.WrapRecyclerAdapter;
 
 public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<RefreshRecyclerView> {
 
@@ -185,8 +184,8 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
         mAutoRecyclerAdapter.setAutoLoadUsable(usable);
     }
 
-    public void setShowLoadEnd(boolean usable) {
-        mAutoRecyclerAdapter.setShowLoadEnd(usable);
+    public void setShowNoMoreDataItem(boolean showNoMoreDataItem) {
+        mAutoRecyclerAdapter.setShowNoMoreDataItem(showNoMoreDataItem);
     }
 
     public boolean isManualLoad() {
@@ -216,13 +215,13 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
         }
     }
 
-    public void onLoadingDataComplete() {
-        this.onLoadingDataComplete(false);
+    public void onLoadingComplete() {
+        this.onLoadingComplete(false);
     }
 
     @Override
-    public void onLoadingDataComplete(boolean loadable) {
-        super.onLoadingDataComplete(loadable);
+    public void onLoadingComplete(boolean loadable) {
+        super.onLoadingComplete(loadable);
         if(!loadable) {
             mAutoRecyclerAdapter.setLoadEnd(true);
             mAutoRecyclerAdapter.setLoadError(false);

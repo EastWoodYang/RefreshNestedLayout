@@ -54,16 +54,16 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     public static final int SMOOTH_SCROLL_DURATION_MS = 250;
 
-    private static final String STATE_MODE = "ptr_mode";
-    private static final String STATE_ABLE = "ptr_abel";
-    private static final String STATE_SUPER = "ptr_super";
+    private static final String STATE_MODE = "rnl_mode";
+    private static final String STATE_ABLE = "rnl_abel";
+    private static final String STATE_SUPER = "rnl_super";
 
     private static final int INVALID_POINTER = -1;
     private static final float DRAG_RATE = .6125f;
 
     private boolean mDisableScrollWhenRefreshing;
 
-    protected boolean mLoadingData;
+    protected boolean mLoading;
     protected State mCurrentState = State.RESET;
     protected LoadState mCurrentLoadState = LoadState.RESET;
     protected Mode mMode = Mode.getDefault();
@@ -88,8 +88,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     // Target is returning to its start offset because it was cancelled or a
     // refresh was triggered.
     private boolean mReturningToStart;
-    private boolean mRefreshing = false;
-    private boolean mIsMoving;
 
     private boolean mIsDisable;
 
@@ -212,7 +210,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
             return true;
         }
 
-        if (!isEnabled() || mIsDisable || mLoadingData || mMode == Mode.DISABLED || mMode == Mode.AUTO_LOAD
+        if (!isEnabled() || mIsDisable || mLoading || mMode == Mode.DISABLED || mMode == Mode.AUTO_LOAD
                 || mNestedScrollInProgress || canChildScrollUp()) {
             // Fail fast if we're not in a state where a swipe is possible
             return false;
@@ -266,7 +264,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
                 if (getScrollY() != 0) {
-                    mIsMoving = false;
                     smoothScrollTo(0);
                 }
                 break;
@@ -332,7 +329,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                         moveHeader((int) overScrollTop);
                     } else {
                         mIsBeingDragged = false;
-                        mIsMoving = false;
                         setBodyScroll(0);
                         // Apps can set the interception target other than the direct parent.
                         final ViewGroup parent = this;
@@ -418,7 +414,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     }
 
     public boolean isLoading() {
-        return mLoadingData;
+        return mLoading;
     }
 
     public final boolean isManualScrolling() {
@@ -500,8 +496,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
             setBodyScroll(0);
             return;
         }
-
-        mIsMoving = true;
 
         int actualScrolledValue;
         if (needToScrollValue < -mPullMaxDistance) {
@@ -655,35 +649,35 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         return mShowEmptyLayout;
     }
 
-    public void setShowEmptyLayout(boolean mShowEmptyLayout) {
-        this.mShowEmptyLayout = mShowEmptyLayout;
+    public void setShowEmptyLayout(boolean showEmptyLayout) {
+        this.mShowEmptyLayout = showEmptyLayout;
     }
 
-    public void setEmptyLayoutResId(int resId) {
-        View emptyView = LayoutInflater.from(mContext).inflate(resId, null);
-        setEmptyView(emptyView);
+    public void setEmptyLayoutResourceId(int resource) {
+        View view = LayoutInflater.from(mContext).inflate(resource, null);
+        setEmptyLayout(view);
     }
 
-    public void setEmptyView(View emptyView) {
+    public void setEmptyLayout(View view) {
         mEmptyLayout.removeAllViews();
-        mEmptyLayout.addView(emptyView);
+        mEmptyLayout.addView(view);
     }
 
-    public void setEmptyContent(int resId) {
+    public void setEmptyLayoutTextContent(int resId) {
         String content = mContext.getResources().getText(resId).toString();
-        setEmptyContent(content);
+        setEmptyLayoutTextContent(content);
     }
 
-    public void setEmptyContent(String content) {
-        setEmptyContent(R.id.content_text_view, content);
+    public void setEmptyLayoutTextContent(String content) {
+        setEmptyLayoutTextContent(R.id.content_text_view, content);
     }
 
-    public void setEmptyContent(int viewId, int resId) {
+    public void setEmptyLayoutTextContent(int viewId, int resId) {
         String content = mContext.getResources().getText(resId).toString();
-        setEmptyContent(viewId, content);
+        setEmptyLayoutTextContent(viewId, content);
     }
 
-    public void setEmptyContent(int viewId, String content) {
+    public void setEmptyLayoutTextContent(int viewId, String content) {
         if(mEmptyLayout == null) {
             return;
         }
@@ -694,14 +688,14 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         }
     }
 
-    public void setLoadingLayoutResId(int resId) {
-        View loadingView = LayoutInflater.from(mContext).inflate(resId, null);
-        setEmptyView(loadingView);
+    public void setLoadingLayoutResourceId(int resource) {
+        View view = LayoutInflater.from(mContext).inflate(resource, null);
+        setLoadingView(view);
     }
 
-    public void setLoadingView(View loadingView) {
-        mEmptyLayout.removeAllViews();
-        mEmptyLayout.addView(loadingView);
+    public void setLoadingView(View view) {
+        mLoadingLayout.removeAllViews();
+        mLoadingLayout.addView(view);
     }
 
     public boolean canChildScrollUp() {
@@ -921,7 +915,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     protected void onReset() {
         mIsBeingDragged = false;
-        mIsMoving = false;
         mReturningToStart = true;
         smoothScrollTo(0);
     }
@@ -943,8 +936,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         checkBody();
     }
 
-    public void onLoadingDataStart() {
-        mLoadingData = true;
+    public void onLoadingStart() {
+        mLoading = true;
         mRefreshableView.setVisibility(GONE);
         mEmptyLayout.setVisibility(GONE);
         if(Build.VERSION.SDK_INT >= 12) {
@@ -953,15 +946,27 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mLoadingLayout.setVisibility(VISIBLE);
     }
 
-    public void onLoadingDataComplete(boolean loadable) {
+    public void onLoadingComplete(boolean loadable) {
         setLoadState(loadable);
-        mLoadingData = false;
+        mLoading = false;
         crossFading(mRefreshableView, mLoadingLayout);
         checkBody();
     }
 
     public void showEmptyLayout() {
         crossFading(mEmptyLayout, mRefreshableView);
+    }
+
+    public void hiddenEmptyLayout() {
+        crossFading(mRefreshableView, mEmptyLayout);
+    }
+
+    public void showLoadingLayout() {
+        crossFading(mLoadingLayout, mRefreshableView);
+    }
+
+    public void hiddenLoadingLayout() {
+        crossFading(mRefreshableView, mLoadingLayout);
     }
 
     protected abstract void checkBody();
@@ -1137,6 +1142,5 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
         return mNestedScrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY);
     }
-
 
 }

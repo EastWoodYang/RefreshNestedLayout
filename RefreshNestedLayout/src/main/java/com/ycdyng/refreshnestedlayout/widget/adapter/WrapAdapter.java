@@ -45,7 +45,7 @@ public class WrapAdapter<T extends BaseAdapter> extends AutoBaseAdapter {
 
     @Override
     public int getCount() {
-        int extra = autoLoadUsable || (loadEnd && showLoadEnd) ? 1 : 0;
+        int extra = autoLoadUsable || (showNoMoreDataItem && loadEnd) ? 1 : 0;
         return mBase.getCount() + extra;
     }
 

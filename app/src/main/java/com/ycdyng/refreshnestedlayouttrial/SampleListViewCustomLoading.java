@@ -45,18 +45,18 @@ public class SampleListViewCustomLoading extends AppCompatActivity {
         };
 
         setContentView(R.layout.sample_list_view_custom_loading); // set loading layout and empty layout
-        // or mRefresher.setLoadingLayoutResId(int resId);
+        // or mRefresher.setLoadingLayoutResourceId(int resId);
         // or mRefresher.setLoadingView(View loadingView);
 
-        // or mRefresher.setEmptyLayoutResId(int resId);
-        // or mRefresher.setEmptyView(View emptyView);
+        // or mRefresher.setEmptyLayoutResourceId(int resId);
+        // or mRefresher.setEmptyLayout(View emptyView);
 
-        // also can change empty view content by call mRefresher.setEmptyContent().
+        // also can change empty view content by call mRefresher.setEmptyLayoutTextContent().
 
         mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
 
-        mRefresher.onLoadingDataStart();
+        mRefresher.onLoadingStart();
         handleLoadingDataEvent();
     }
 
@@ -73,7 +73,7 @@ public class SampleListViewCustomLoading extends AppCompatActivity {
 
                 // if mDataList is empty, will show custom empty layout.
 
-                mRefresher.onLoadingDataComplete(false);
+                mRefresher.onLoadingComplete(false);
             }
         }, 3000);
     }

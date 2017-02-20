@@ -83,12 +83,12 @@ public class RefreshNestedScrollViewLayout extends RefreshNestedLayout<NestedScr
         onRefreshComplete(true);
     }
 
-    public void onLoadingDataComplete() {
-        onLoadingDataComplete(false);
+    public void onLoadingComplete() {
+        onLoadingComplete(false);
     }
 
     @Override
-    public void onLoadingDataComplete(boolean loadable) {
+    public void onLoadingComplete(boolean loadable) {
         crossFading(mRefreshableView, mLoadingLayout);
     }
 }

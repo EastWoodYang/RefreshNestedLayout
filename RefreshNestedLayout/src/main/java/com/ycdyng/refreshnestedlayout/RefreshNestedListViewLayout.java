@@ -149,8 +149,8 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
         mAutoBaseAdapter.setAutoLoadUsable(usable);
     }
 
-    public void setShowLoadEnd(boolean usable) {
-        mAutoBaseAdapter.setShowLoadEnd(usable);
+    public void setShowNoMoreDataItem(boolean show) {
+        mAutoBaseAdapter.setShowNoMoreDataItem(show);
     }
 
     public boolean isManualLoad() {
@@ -182,13 +182,13 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
         }
     }
 
-    public void onLoadingDataComplete() {
-        this.onLoadingDataComplete(false);
+    public void onLoadingComplete() {
+        this.onLoadingComplete(false);
     }
 
     @Override
-    public void onLoadingDataComplete(boolean loadable) {
-        super.onLoadingDataComplete(loadable);
+    public void onLoadingComplete(boolean loadable) {
+        super.onLoadingComplete(loadable);
         if (!loadable) {
             mAutoBaseAdapter.setLoadEnd(true);
             mAutoBaseAdapter.setLoadError(false);

@@ -91,7 +91,7 @@ public class SampleListViewCustomAutoLoad extends AppCompatActivity {
                     mAutoLoadCount++;
                     mRefresher.onAutoLoadingComplete(true);
                 } else {
-                    mRefresher.setShowLoadEnd(true);
+                    mRefresher.setShowNoMoreDataItem(true);
                     mRefresher.setAutoLoadUsable(false);
                     mRefresher.onAutoLoadingComplete(false);
                 }

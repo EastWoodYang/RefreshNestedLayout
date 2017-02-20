@@ -1,6 +1,7 @@
 package com.ycdyng.refreshnestedlayout.widget.observable;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -118,6 +119,14 @@ public class ObservableListView extends ListView {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        // when drag in blank area of ListView, return true to trigger pull-to-refresh action
+        if(Build.VERSION.SDK_INT >= 21) {
+            int position = pointToPosition((int)ev.getX(), (int)ev.getY());
+            if(INVALID_POSITION == position) {
+                return true;
+            }
+        }
+
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 break;
