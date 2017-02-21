@@ -37,7 +37,7 @@ public abstract class AutoRecyclerAdapter<VH extends RecyclerView.ViewHolder> ex
     protected boolean loadEnd;
     protected boolean loading;
 
-    protected boolean showNoMoreDataItem = true;
+    protected boolean showNoMoreDataItem;
 
     protected int autoLoadResId;
     protected int clickableResId;

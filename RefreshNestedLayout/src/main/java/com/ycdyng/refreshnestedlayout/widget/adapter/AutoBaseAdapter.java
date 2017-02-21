@@ -30,7 +30,7 @@ public abstract class AutoBaseAdapter extends BaseAdapter {
     protected boolean loadEnd;
     protected boolean loading;
 
-    protected boolean showNoMoreDataItem = true;
+    protected boolean showNoMoreDataItem;
 
     protected int autoLoadResId;
     protected int clickableResId;
