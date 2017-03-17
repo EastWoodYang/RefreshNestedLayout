@@ -37,6 +37,8 @@ public abstract class AutoBaseAdapter extends BaseAdapter {
     protected int loadEndResId;
     protected int loadErrorResId;
 
+    protected boolean alwaysShowHeader = false;
+
     protected View.OnClickListener mOnLastItemClickListener;
 
     public int getLastItemViewType() {
@@ -152,4 +154,19 @@ public abstract class AutoBaseAdapter extends BaseAdapter {
         this.mOnLastItemClickListener = listener;
     }
 
+    public void setAlwaysShowHeader(boolean alwaysShowHeader) {
+        this.alwaysShowHeader = alwaysShowHeader;
+    }
+
+    public boolean isAlwaysShowHeader() {
+        return alwaysShowHeader;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        if (alwaysShowHeader) {
+            return false;
+        }
+        return super.isEmpty();
+    }
 }

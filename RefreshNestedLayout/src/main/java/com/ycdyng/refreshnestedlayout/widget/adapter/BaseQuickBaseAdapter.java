@@ -39,8 +39,6 @@ public abstract class BaseQuickBaseAdapter<T, H extends BaseAdapterHelper> exten
 
     protected final List<T> data;
 
-    protected boolean alwaysShowHeader = false;
-
     /**
      * Create a QuickAdapter.
      * @param context     The context.
@@ -172,15 +170,4 @@ public abstract class BaseQuickBaseAdapter<T, H extends BaseAdapterHelper> exten
      */
     protected abstract H getAdapterHelper(int position, View convertView, ViewGroup parent);
 
-    public void setAlwaysShowHeader(boolean alwaysShowHeader) {
-        this.alwaysShowHeader = alwaysShowHeader;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        if (alwaysShowHeader) {
-            return false;
-        }
-        return super.isEmpty();
-    }
 }

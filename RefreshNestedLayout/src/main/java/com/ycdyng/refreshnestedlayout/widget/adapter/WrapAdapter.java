@@ -24,8 +24,6 @@ public class WrapAdapter<T extends BaseAdapter> extends AutoBaseAdapter {
 
     private final T mBase;
 
-    protected boolean alwaysShowHeader = false;
-
     /**
      * Constructor.
      *
@@ -76,17 +74,5 @@ public class WrapAdapter<T extends BaseAdapter> extends AutoBaseAdapter {
     @Override
     public int getItemViewType(int position) {
         return position >= mBase.getCount() ? 1 : 0;
-    }
-
-    public void setAlwaysShowHeader(boolean alwaysShowHeader) {
-        this.alwaysShowHeader = alwaysShowHeader;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        if (alwaysShowHeader) {
-            return false;
-        }
-        return super.isEmpty();
     }
 }

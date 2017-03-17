@@ -971,31 +971,31 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     protected abstract void checkBody();
 
-    protected void crossFading(View contentView, final View loadingView) {
+    protected void crossFading(View showView, final View hideView) {
         if(Build.VERSION.SDK_INT >= 12) {
-            if(contentView.getVisibility() == VISIBLE) {
-                loadingView.setVisibility(GONE);
+            if(showView.getVisibility() == VISIBLE) {
+                hideView.setVisibility(GONE);
                 return;
             }
-            contentView.setAlpha(0f);
-            contentView.setVisibility(VISIBLE);
-            contentView.animate()
+            showView.setAlpha(0f);
+            showView.setVisibility(VISIBLE);
+            showView.animate()
                     .alpha(1f)
                     .setDuration(400)
                     .setListener(null);
 
-            loadingView.animate()
+            hideView.animate()
                     .alpha(0f)
                     .setDuration(400)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            loadingView.setVisibility(GONE);
+                            hideView.setVisibility(GONE);
                         }
                     });
         } else {
-            contentView.setVisibility(VISIBLE);
-            loadingView.setVisibility(GONE);
+            showView.setVisibility(VISIBLE);
+            hideView.setVisibility(GONE);
         }
     }
 
