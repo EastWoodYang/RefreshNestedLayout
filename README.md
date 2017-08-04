@@ -8,7 +8,7 @@ This project aims to provide a powerful and convenient widget for Android, inclu
 * Currently works with **ListView**, **RecycleView** and **ScrollView**, also behave well in **CoordinatorLayout**.
 * Two modes of data adapter: Quick and Wrap, like **QuickAdapter** or **WrapAdapter**.
 
-# Dome
+# Demo
 <font color=#A10000>DownLoad and run it.</font> (I know it's a bad experience)
 
 # Usage
