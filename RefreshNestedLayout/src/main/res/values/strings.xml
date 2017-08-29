@@ -1,8 +1,8 @@
 <resources>
+    <string name="app_name">RefreshNestedLayout</string>
     <string name="pull_to_refresh">PULL TO REFRESH</string>
     <string name="release_to_refresh">RELEASE TO REFRESH</string>
     <string name="refreshing">REFRESHING DATA</string>
-    <string name="app_name">RefreshNestedLayout</string>
     <string name="load_failure">FAILURE, CLICK TO RETRY</string>
     <string name="load_end">NO MORE DATA</string>
     <string name="load_more">CLICK TO LOAD MORE</string>

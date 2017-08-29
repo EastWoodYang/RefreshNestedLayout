@@ -45,6 +45,16 @@
         </activity>
 
         <activity
+            android:name=".SampleListViewLoading2"
+            android:label="ListView/loading2">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+
+        <activity
             android:name=".SampleListViewAutoLoad"
             android:label="ListView/auto load">
             <intent-filter>

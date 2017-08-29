@@ -16,16 +16,18 @@
 
 package com.ycdyng.refreshnestedlayouttrial;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout;
+import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
 import com.ycdyng.refreshnestedlayout.widget.adapter.BaseAdapterHelper;
 import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
 
 import java.util.ArrayList;
 
-public class SampleListViewLoading extends AppCompatActivity {
+public class SampleListViewLoading2 extends AppCompatActivity {
 
     private RefreshNestedListViewLayout mRefresher;
 
@@ -48,7 +50,18 @@ public class SampleListViewLoading extends AppCompatActivity {
         mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
         mRefresher.setAdapter(mQuickAdapter);
 
+        final ProgressDialog progressDialog = new ProgressDialog(SampleListViewLoading2.this);
+        progressDialog.setMessage("waiting...");
+        progressDialog.setCancelable(false);
+        progressDialog.setCanceledOnTouchOutside(false);
+        mRefresher.setOnLoadingStartListener(new RefreshNestedLayout.OnLoadingStartListener() {
+            @Override
+            public void onLoadingStart() {
+                progressDialog.show();
+            }
+        });
         mRefresher.onLoadingStart();
+
         mRefresher.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -62,6 +75,7 @@ public class SampleListViewLoading extends AppCompatActivity {
                 // if DataSet empty, will show empty layout.
                 // if you set custom empty layout, will show it.
 
+                progressDialog.dismiss();
                 mRefresher.onLoadingComplete();
             }
         }, 2000);

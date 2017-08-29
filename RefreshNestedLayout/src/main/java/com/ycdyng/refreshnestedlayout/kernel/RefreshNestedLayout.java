@@ -107,6 +107,9 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     private OnRefreshListener mOnRefreshListener;
 
+    private boolean crossFading;
+    private OnLoadingStartListener mOnLoadingStartListener;
+
     public RefreshNestedLayout(Context context) {
         this(context, null);
     }
@@ -134,6 +137,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mRefreshingDistance = a.getDimensionPixelSize(R.styleable.RefreshNestedLayout_refreshingDistance, getResources().getDimensionPixelOffset(R.dimen.default_refreshing_distance));
 
         mDisableScrollWhenRefreshing = a.getBoolean(R.styleable.RefreshNestedLayout_disableScrollWhenRefreshing, false);
+
+        crossFading = a.getBoolean(R.styleable.RefreshNestedLayout_crossFading, true);
 
         handleStyledAttributes(a);
 
@@ -735,8 +740,17 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         void onLoading();
     }
 
+    public interface OnLoadingStartListener {
+
+        void onLoadingStart();
+    }
+
     public final void setOnRefreshListener(OnRefreshListener listener) {
         mOnRefreshListener = listener;
+    }
+
+    public final void setOnLoadingStartListener(OnLoadingStartListener listener) {
+        this.mOnLoadingStartListener = listener;
     }
 
     @Override
@@ -967,16 +981,24 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mLoading = true;
         mRefreshableView.setVisibility(GONE);
         mEmptyLayout.setVisibility(GONE);
-        if (Build.VERSION.SDK_INT >= 12) {
-            mLoadingLayout.setAlpha(1f);
+        if (mOnLoadingStartListener != null) {
+            mOnLoadingStartListener.onLoadingStart();
+        } else {
+            if (Build.VERSION.SDK_INT >= 12) {
+                mLoadingLayout.setAlpha(1f);
+            }
+            mLoadingLayout.setVisibility(VISIBLE);
         }
-        mLoadingLayout.setVisibility(VISIBLE);
     }
 
     public void onLoadingComplete(boolean loadable) {
         setLoadState(loadable);
         mLoading = false;
-        crossFading(mRefreshableView, mLoadingLayout);
+        if (mOnLoadingStartListener != null) {
+            crossFading(mRefreshableView);
+        } else {
+            crossFading(mRefreshableView, mLoadingLayout);
+        }
         checkBody();
     }
 
@@ -998,8 +1020,24 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     protected abstract void checkBody();
 
+    protected void crossFading(View showView) {
+        if (Build.VERSION.SDK_INT >= 12 && crossFading) {
+            if (showView.getVisibility() == VISIBLE) {
+                return;
+            }
+            showView.setAlpha(0f);
+            showView.setVisibility(VISIBLE);
+            showView.animate()
+                    .alpha(1f)
+                    .setDuration(400)
+                    .setListener(null);
+        } else {
+            showView.setVisibility(VISIBLE);
+        }
+    }
+
     protected void crossFading(View showView, final View hideView) {
-        if (Build.VERSION.SDK_INT >= 12) {
+        if (Build.VERSION.SDK_INT >= 12 && crossFading) {
             if (showView.getVisibility() == VISIBLE) {
                 hideView.setVisibility(GONE);
                 return;

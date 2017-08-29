@@ -26,6 +26,8 @@
         <attr name="clickableLayout" format="reference"/>
         <attr name="loadEndLayout" format="reference"/>
         <attr name="loadErrorLayout" format="reference"/>
+
+        <attr name="crossFading" format="boolean"/>
     </declare-styleable>
 
 </resources>
