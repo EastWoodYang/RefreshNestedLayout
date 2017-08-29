@@ -133,7 +133,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mPullMaxDistance = a.getDimensionPixelSize(R.styleable.RefreshNestedLayout_pullMaxDistance, getResources().getDimensionPixelOffset(R.dimen.default_pull_max_distance));
         mRefreshingDistance = a.getDimensionPixelSize(R.styleable.RefreshNestedLayout_refreshingDistance, getResources().getDimensionPixelOffset(R.dimen.default_refreshing_distance));
 
-        mDisableScrollWhenRefreshing = a.getBoolean(R.styleable.RefreshNestedLayout_disableScrollWhenRefreshing, true);
+        mDisableScrollWhenRefreshing = a.getBoolean(R.styleable.RefreshNestedLayout_disableScrollWhenRefreshing, false);
 
         handleStyledAttributes(a);
 
@@ -206,7 +206,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     public boolean onInterceptTouchEvent(MotionEvent event) {
         final int action = MotionEventCompat.getActionMasked(event);
 
-        if (action == MotionEvent.ACTION_DOWN && mDisableScrollWhenRefreshing && (isRefreshing() || mCurrentState == State.SCROLL_TO_REFRESH)) {
+        if ((action == MotionEvent.ACTION_DOWN && mDisableScrollWhenRefreshing && (isRefreshing() || mCurrentState == State.SCROLL_TO_REFRESH)) || mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.SCROLL_TO_REFRESH) {
             return true;
         }
 
@@ -326,6 +326,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                 final float overScrollTop = (mInitialMotionY - y) * DRAG_RATE;
                 if (mIsBeingDragged) {
                     if (overScrollTop <= 0) {
+                        Log.e(LOG_TAG, "overScrollTop: " + overScrollTop);
                         moveHeader((int) overScrollTop);
                     } else {
                         mIsBeingDragged = false;
@@ -458,6 +459,10 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     private void smoothScrollTo(int scrollValue, OnSmoothScrollFinishedListener listener) {
         smoothScrollTo(scrollValue, getPullToRefreshScrollDuration(), 0, listener);
+    }
+
+    private void smoothScrollTo(int scrollValue, long delayMillis, OnSmoothScrollFinishedListener listener) {
+        smoothScrollTo(scrollValue, getPullToRefreshScrollDuration(), delayMillis, listener);
     }
 
     private void smoothScrollTo(int newScrollValue, long duration, long delayMillis, OnSmoothScrollFinishedListener listener) {
@@ -678,11 +683,11 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     }
 
     public void setEmptyLayoutTextContent(int viewId, String content) {
-        if(mEmptyLayout == null) {
+        if (mEmptyLayout == null) {
             return;
         }
         View contentView = mEmptyLayout.findViewById(viewId);
-        if(contentView instanceof TextView) {
+        if (contentView instanceof TextView) {
             TextView contentTextView = (TextView) contentView;
             contentTextView.setText(content);
         }
@@ -819,6 +824,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
         RESET(0x0),
 
+        AUTO_REFRESH(0x4),
+
         SCROLL_TO_REFRESH(0x5),
 
         AUTO_SCROLLING(0x6),
@@ -889,6 +896,22 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                 mReturningToStart = true;
                 smoothScrollTo(-mRefreshingDistance, mOnSmoothScrollFinishedListener);
                 break;
+            case AUTO_REFRESH:
+                mCurrentState = State.AUTO_SCROLLING;
+                smoothScrollTo(-mPullMaxDistance, 350, 0, new OnSmoothScrollFinishedListener() {
+
+                    @Override
+                    public void onSmoothScrollFinished() {
+                        mCurrentState = State.AUTO_SCROLLING;
+                        postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                setState(State.SCROLL_TO_REFRESH);
+                            }
+                        }, 150);
+                    }
+                });
+                break;
             case REFRESHING:
                 mCurrentState = State.REFRESHING;
                 break;
@@ -927,6 +950,10 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mCurrentLoadState = LoadState.LOADING_ERROR;
     }
 
+    public void onAutoRefresh() {
+        setState(State.AUTO_REFRESH);
+    }
+
     public void onRefreshComplete(boolean loadable) {
         setLoadState(loadable);
         if (mHeaderLayout != null) {
@@ -940,7 +967,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mLoading = true;
         mRefreshableView.setVisibility(GONE);
         mEmptyLayout.setVisibility(GONE);
-        if(Build.VERSION.SDK_INT >= 12) {
+        if (Build.VERSION.SDK_INT >= 12) {
             mLoadingLayout.setAlpha(1f);
         }
         mLoadingLayout.setVisibility(VISIBLE);
@@ -972,8 +999,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     protected abstract void checkBody();
 
     protected void crossFading(View showView, final View hideView) {
-        if(Build.VERSION.SDK_INT >= 12) {
-            if(showView.getVisibility() == VISIBLE) {
+        if (Build.VERSION.SDK_INT >= 12) {
+            if (showView.getVisibility() == VISIBLE) {
                 hideView.setVisibility(GONE);
                 return;
             }

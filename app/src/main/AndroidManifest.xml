@@ -27,6 +27,15 @@
         </activity>
 
         <activity
+            android:name=".SampleListViewAutoRefresh"
+            android:label="ListView/auto refresh">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="com.ycdyng.refreshnestedlayouttrial.SAMPLE" />
+            </intent-filter>
+        </activity>
+
+        <activity
             android:name=".SampleListViewLoading"
             android:label="ListView/loading">
             <intent-filter>
