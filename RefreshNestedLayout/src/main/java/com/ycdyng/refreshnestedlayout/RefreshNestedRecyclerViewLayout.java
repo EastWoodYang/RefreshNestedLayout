@@ -116,7 +116,7 @@ public class RefreshNestedRecyclerViewLayout extends RefreshNestedLayout<Refresh
                         int totalItemCount = linearLayoutManager.getItemCount();
                         int firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition();
                         if (mCurrentLoadState != LoadState.AUTO_LOADING && (visibleItemCount + firstVisibleItem) >= totalItemCount &&
-                                (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.SCROLL_TO_REFRESH ||
+                                (mCurrentState == State.NONE || mCurrentState == State.SCROLL_TO_REFRESH ||
                                         mCurrentLoadState == LoadState.LOADING_END || mCurrentLoadState == LoadState.LOADING_ERROR)) {
                             if (!isManualLoad()) {
                                 if (mCurrentLoadState == LoadState.LOADING_END) {

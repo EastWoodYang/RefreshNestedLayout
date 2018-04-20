@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#A10000">
 
     <TextView
         android:id="@+id/tip_text_view"
@@ -12,6 +13,6 @@
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="12dp"
         android:textSize="12dp"
-        android:textColor="#999999" />
+        android:textColor="#FFFFFF" />
 
 </FrameLayout>

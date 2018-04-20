@@ -122,7 +122,7 @@ public class SampleListViewAppBar extends Activity implements View.OnTouchListen
                 mQuickAdapter.notifyDataSetChanged();
                 mRefresher.onRefreshComplete(false);
             }
-        }, 1500);
+        }, 8000);
     }
 
     private void handleAutoLoadEvent() {

@@ -23,7 +23,6 @@ import android.content.res.TypedArray;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.NestedScrollingChild;
 import android.support.v4.view.NestedScrollingChildHelper;
 import android.support.v4.view.NestedScrollingParent;
@@ -36,7 +35,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.AbsListView;
@@ -44,6 +42,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.ycdyng.refreshnestedlayout.R;
+
+import java.util.Arrays;
 
 public abstract class RefreshNestedLayout<T extends View> extends FrameLayout implements NestedScrollingParent,
         NestedScrollingChild {
@@ -59,12 +59,13 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     private static final String STATE_SUPER = "rnl_super";
 
     private static final int INVALID_POINTER = -1;
-    private static final float DRAG_RATE = .6125f;
+    private static float DRAG_RATE = .6125f;
 
-    private boolean mDisableScrollWhenRefreshing;
 
     protected boolean mLoading;
-    protected State mCurrentState = State.RESET;
+    protected boolean mRefreshing;
+
+    protected State mCurrentState = State.NONE;
     protected LoadState mCurrentLoadState = LoadState.RESET;
     protected Mode mMode = Mode.getDefault();
     protected Mode mCurrentMode;
@@ -85,11 +86,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     private boolean mIsBeingDragged;
     private int mActivePointerId = INVALID_POINTER;
 
-    // Target is returning to its start offset because it was cancelled or a
-    // refresh was triggered.
-    private boolean mReturningToStart;
-
-    private boolean mIsDisable;
+    private boolean mRefreshEnabled = true;
+    private boolean mScrollWhenRefreshingEnabled;
 
     private int mTouchSlop;
     private float mInitialMotionY;
@@ -136,8 +134,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mPullMaxDistance = a.getDimensionPixelSize(R.styleable.RefreshNestedLayout_pullMaxDistance, getResources().getDimensionPixelOffset(R.dimen.default_pull_max_distance));
         mRefreshingDistance = a.getDimensionPixelSize(R.styleable.RefreshNestedLayout_refreshingDistance, getResources().getDimensionPixelOffset(R.dimen.default_refreshing_distance));
 
-        mDisableScrollWhenRefreshing = a.getBoolean(R.styleable.RefreshNestedLayout_disableScrollWhenRefreshing, false);
-
+        mScrollWhenRefreshingEnabled = a.getBoolean(R.styleable.RefreshNestedLayout_scrollWhenRefreshingEnabled, true);
         crossFading = a.getBoolean(R.styleable.RefreshNestedLayout_crossFading, true);
 
         handleStyledAttributes(a);
@@ -168,6 +165,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         } else {
             refreshableView = null;
             addView(mRefreshableView, -1);
+            ViewCompat.setNestedScrollingEnabled(mRefreshableView, true);
         }
 
         RefreshEmptyLayout emptyLayout = createEmptyView(mContext, mAttributeSet);
@@ -199,7 +197,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
             }
             case AUTO_LOAD:
             case DISABLED: {
-                mIsDisable = true;
+                mRefreshEnabled = false;
                 break;
             }
         }
@@ -209,202 +207,222 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        final int action = MotionEventCompat.getActionMasked(event);
+        Log.e(LOG_TAG, "-------------------------------onInterceptTouchEvent");
+        Log.e(LOG_TAG, "onInterceptTouchEvent: " + event.actionToString(event.getAction()) + ", mCurrentState: " + mCurrentState.name());
 
-        if ((action == MotionEvent.ACTION_DOWN && mDisableScrollWhenRefreshing && (isRefreshing() || mCurrentState == State.SCROLL_TO_REFRESH)) || mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.SCROLL_TO_REFRESH) {
-            return true;
-        }
-
-        if (!isEnabled() || mIsDisable || mLoading || mMode == Mode.DISABLED || mMode == Mode.AUTO_LOAD
-                || mNestedScrollInProgress || canChildScrollUp()) {
-            // Fail fast if we're not in a state where a swipe is possible
+        if (!mRefreshEnabled || mLoading || mMode == Mode.DISABLED || mMode == Mode.AUTO_LOAD) {
             return false;
         }
 
-        if (mReturningToStart) {
-            mActivePointerId = MotionEventCompat.getPointerId(event, 0);
-            mIsBeingDragged = false;
-            final float initialDownY = getMotionEventY(event, mActivePointerId);
-            if (initialDownY == -1) {
-                return false;
-            }
-            mInitialDownY = initialDownY;
+        if(mNestedScrollInProgress) {
+            return false;
+        }
+
+        if (mCurrentState == State.SCROLL_TO_BACK || mCurrentState == State.SCROLL_TO_REFRESH) {
+            return true;
+        }
+
+        final int action = event.getActionMasked();
+        int pointerIndex;
+
+        if (mCurrentState == State.REFRESHING) {
+
+        } else if (!isEnabled() || canChildScrollUp() || mNestedScrollInProgress) {
+            // Fail fast if we're not in a state where a swipe is possible
+            Log.e(LOG_TAG, "nestedScrollInProgress 1 ...");
             return false;
         }
 
         switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mActivePointerId = MotionEventCompat.getPointerId(event, 0);
+            case MotionEvent.ACTION_DOWN: {
+                mActivePointerId = event.getPointerId(0);
                 mIsBeingDragged = false;
-                final float initialDownY = getMotionEventY(event, mActivePointerId);
-                if (initialDownY == -1) {
+                pointerIndex = event.findPointerIndex(mActivePointerId);
+                if (pointerIndex < 0) {
                     return false;
                 }
-                mInitialDownY = initialDownY;
-                break;
+                mInitialDownY = event.getY(pointerIndex);
 
-            case MotionEvent.ACTION_MOVE:
+                if (mCurrentState == State.REFRESHING) {
+                    mInitialDownY -= mRefreshingDistance / DRAG_RATE;
+                }
+                break;
+            }
+            case MotionEvent.ACTION_MOVE: {
                 if (mActivePointerId == INVALID_POINTER) {
-                    Log.e(LOG_TAG, "Got ACTION_MOVE event but don't have an active pointer id.");
+                    Log.e(LOG_TAG, "onInterceptTouchEvent, Got ACTION_MOVE event but don't have an active pointer id.");
                     return false;
                 }
-
-                final float y = getMotionEventY(event, mActivePointerId);
-                if (y == -1) {
+                pointerIndex = event.findPointerIndex(mActivePointerId);
+                if (pointerIndex < 0) {
                     return false;
                 }
-                final float yDiff = y - mInitialDownY;
-                if (yDiff > mTouchSlop && !mIsBeingDragged) {
-                    mInitialMotionY = mInitialDownY + mTouchSlop;
-                    mIsBeingDragged = true;
+                float y = event.getY(pointerIndex);
+                if (mCurrentState == State.REFRESHING) {
+                    float yDiff = y - (mInitialDownY + mRefreshingDistance / DRAG_RATE);
+                    if (Math.abs(yDiff) > mTouchSlop && !mIsBeingDragged) {
+                        if (yDiff > 0) {
+                            mInitialMotionY = mInitialDownY + mTouchSlop;
+                        } else {
+                            mInitialMotionY = mInitialDownY - mTouchSlop;
+                        }
+                        mIsBeingDragged = true;
+                    }
+                } else {
+                    float yDiff = y - mInitialDownY;
+                    startDragging(yDiff);
                 }
                 break;
-
-            case MotionEventCompat.ACTION_POINTER_UP:
+            }
+            case MotionEvent.ACTION_POINTER_UP: {
                 onSecondaryPointerUp(event);
                 break;
-
+            }
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_CANCEL: {
                 mIsBeingDragged = false;
                 mActivePointerId = INVALID_POINTER;
-                if (getScrollY() != 0) {
-                    smoothScrollTo(0);
+                if (mCurrentState != State.REFRESHING && getScrollY() != 0) {
+                    // TODO scrollBody directly ?
+                    onReset();
                 }
                 break;
+            }
         }
-
+        Log.e(LOG_TAG, "onInterceptTouchEvent: 8 return " + mIsBeingDragged);
         return mIsBeingDragged;
     }
 
-    private float getMotionEventY(MotionEvent ev, int activePointerId) {
-        final int index = MotionEventCompat.findPointerIndex(ev, activePointerId);
-        if (index < 0) {
-            return -1;
-        }
-        return MotionEventCompat.getY(ev, index);
-    }
-
     private void onSecondaryPointerUp(MotionEvent ev) {
-        final int pointerIndex = MotionEventCompat.getActionIndex(ev);
-        final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
+        final int pointerIndex = ev.getActionIndex();
+        final int pointerId = ev.getPointerId(pointerIndex);
         if (pointerId == mActivePointerId) {
             // This was our active pointer going up. Choose a new
             // active pointer and adjust accordingly.
             final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-            mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+            mActivePointerId = ev.getPointerId(newPointerIndex);
+
+            float activePointerY = ev.getY(newPointerIndex);
+            mInitialDownY = activePointerY + getScrollY() / DRAG_RATE - mTouchSlop;
+            mIsBeingDragged = false;
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        final int action = MotionEventCompat.getActionMasked(event);
-        int pointerIndex = -1;
+        Log.e(LOG_TAG, "-------------------------------onTouchEvent");
+        Log.e(LOG_TAG, "onTouchEvent: " + event.actionToString(event.getAction()) + ", mCurrentState: " + mCurrentState.name());
 
-        if (mReturningToStart && action == MotionEvent.ACTION_DOWN) {
-            mReturningToStart = false;
+        if(mNestedScrollInProgress) {
+            return false;
         }
 
-        if (isRefreshing()) {
+        if (mCurrentState == State.SCROLL_TO_BACK || mCurrentState == State.SCROLL_TO_REFRESH) {
+            Log.e(LOG_TAG, "onTouchEvent, return true, mCurrentState: " + mCurrentState.name());
             return true;
         }
 
-        if (!isEnabled() || mReturningToStart || canChildScrollUp() || mNestedScrollInProgress) {
+        final int action = event.getActionMasked();
+        int pointerIndex = -1;
+
+        if (mCurrentState == State.REFRESHING) {
+            mIsBeingDragged = true;
+            Log.e(LOG_TAG, "onTouchEvent: mIsBeingDragged = true");
+        } else if (!isEnabled() || canChildScrollUp() || mNestedScrollInProgress) {
             // Fail fast if we're not in a state where a swipe is possible
+            Log.e(LOG_TAG, "nestedScrollInProgress 1 ...");
             return false;
         }
 
         switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mActivePointerId = MotionEventCompat.getPointerId(event, 0);
+            case MotionEvent.ACTION_DOWN: {
+                mActivePointerId = event.getPointerId(0);
                 mIsBeingDragged = false;
                 break;
-
+            }
             case MotionEvent.ACTION_MOVE: {
-                pointerIndex = MotionEventCompat.findPointerIndex(event, mActivePointerId);
+                pointerIndex = event.findPointerIndex(mActivePointerId);
                 if (pointerIndex < 0) {
                     Log.e(LOG_TAG, "Got ACTION_MOVE event but have an invalid active pointer id.");
+                    Log.e(LOG_TAG, "onTouchEvent: 3 return " + false);
                     return false;
                 }
 
-                final float y = MotionEventCompat.getY(event, pointerIndex);
+                final float y = event.getY(pointerIndex);
+                final float yDiff = y - mInitialDownY;
+
+                Log.e(LOG_TAG, "onTouchEvent, mInitialDownY: " + mInitialDownY + ", mCurrentDownY: " + y);
+                Log.e(LOG_TAG, "onTouchEvent, yDiff: " + yDiff);
+
+                startDragging(yDiff);
+
                 final float overScrollTop = (mInitialMotionY - y) * DRAG_RATE;
+                Log.e(LOG_TAG, "onTouchEvent, overScrollTop: " + overScrollTop);
                 if (mIsBeingDragged) {
                     if (overScrollTop <= 0) {
-                        Log.e(LOG_TAG, "overScrollTop: " + overScrollTop);
+                        Log.e(LOG_TAG, "onTouchEvent, overScrollTop: " + overScrollTop);
                         moveHeader((int) overScrollTop);
                     } else {
+                        if (mCurrentSmoothScrollRunnable != null) {
+                            mCurrentSmoothScrollRunnable.stop();
+                        }
                         mIsBeingDragged = false;
                         setBodyScroll(0);
-                        // Apps can set the interception target other than the direct parent.
-                        final ViewGroup parent = this;
-
-                        // Get offset to parents. If the parent is not the direct parent,
-                        // we should aggregate offsets from all of the parents.
-                        float offsetX = 0;
-                        float offsetY = 0;
-                        for (View v = this; v != null && v != parent; ) {
-                            offsetX += v.getLeft() - v.getScrollX();
-                            offsetY += v.getTop() - v.getScrollY();
-                            try {
-                                v = (View) v.getParent();
-                            } catch (ClassCastException ex) {
-                                break;
-                            }
-                        }
-                        final MotionEvent ev = MotionEvent.obtainNoHistory(event);
-                        ev.offsetLocation(offsetX, offsetY);
-
-                        // If the parent wants to intercept ACTION_MOVE events,
-                        // we pass ACTION_DOWN event to the parent
-                        // as if these touch events just have began now.
-                        ev.setAction(MotionEvent.ACTION_DOWN);
-                        // Return this onTouchEvent() first and set ACTION_DOWN event for parent
-                        // to the queue, to keep events sequence.
-                        post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mCurrentState = State.RESET;
-                                parent.dispatchTouchEvent(ev);
-                            }
-                        });
                         return false;
                     }
                 }
                 break;
             }
-            case MotionEventCompat.ACTION_POINTER_DOWN: {
-                pointerIndex = MotionEventCompat.getActionIndex(event);
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                pointerIndex = event.getActionIndex();
                 if (pointerIndex < 0) {
                     Log.e(LOG_TAG, "Got ACTION_POINTER_DOWN event but have an invalid action index.");
                     return false;
                 }
-                mActivePointerId = MotionEventCompat.getPointerId(event, pointerIndex);
+                float secondPointerY = event.getY(pointerIndex);
+                int secondPointerId = event.getPointerId(pointerIndex);
+
+                mInitialDownY = secondPointerY + getScrollY() / DRAG_RATE - mTouchSlop;
+                mActivePointerId = secondPointerId;
+                mIsBeingDragged = false;
+                Log.e(LOG_TAG, "onTouchEvent, ACTION_POINTER_DOWN mActivePointerId: " + mActivePointerId);
                 break;
             }
-
-            case MotionEventCompat.ACTION_POINTER_UP:
+            case MotionEvent.ACTION_POINTER_UP: {
                 onSecondaryPointerUp(event);
                 break;
-
+            }
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP: {
-                pointerIndex = MotionEventCompat.findPointerIndex(event, mActivePointerId);
+                pointerIndex = event.findPointerIndex(mActivePointerId);
                 if (pointerIndex < 0) {
                     Log.e(LOG_TAG, "Got ACTION_UP event but don't have an active pointer id.");
+                    Log.e(LOG_TAG, "onTouchEvent: 6 return " + false);
+                    onReset();
                     return false;
                 }
 
-                final float y = MotionEventCompat.getY(event, pointerIndex);
-                final float needToScrollValue = (mInitialMotionY - y) * DRAG_RATE;
-                mIsBeingDragged = false;
-                finishHeader(needToScrollValue);
+                if (mIsBeingDragged) {
+                    final float y = event.getY(pointerIndex);
+                    final float overScrollTop = (mInitialMotionY - y) * DRAG_RATE;
+                    mIsBeingDragged = false;
+                    finishHeader(overScrollTop);
+                }
                 mActivePointerId = INVALID_POINTER;
+                Log.e(LOG_TAG, "onTouchEvent: 7 return " + false);
                 return false;
             }
         }
-
+        Log.e(LOG_TAG, "onTouchEvent: 8 return " + true);
         return true;
+    }
+
+    private void startDragging(float y) {
+        if (y > mTouchSlop && !mIsBeingDragged) {
+            mInitialMotionY = mInitialDownY + mTouchSlop;
+            mIsBeingDragged = true;
+            Log.e(LOG_TAG, "startDragging, mIsBeingDragged = true");
+        }
     }
 
     public final boolean isRefreshing() {
@@ -412,7 +430,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     }
 
     public final boolean isScrolling() {
-        return mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.SCROLL_TO_REFRESH;
+        return mCurrentState == State.SCROLL_TO_REFRESH;
     }
 
     public final boolean isAutoLoading() {
@@ -427,18 +445,21 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         return mCurrentState == State.MANUAL_SCROLLING;
     }
 
-    public void setRefreshUsable(boolean usable) {
-        mIsDisable = !usable;
+    public void setRefreshEnabled(boolean enabled) {
+        mRefreshEnabled = enabled;
     }
 
     private void callRefreshListener() {
         if (null != mOnRefreshListener) {
             setState(State.REFRESHING);
             mHeaderLayout.onRefreshBegin();
-            mOnRefreshListener.onRefresh();
+            if (!mRefreshing) {
+                mRefreshing = true;
+                mOnRefreshListener.onRefresh();
+            }
         } else {
-            mCurrentState = State.RESET;
-            setState(State.RESET);
+            mRefreshing = false;
+            setState(State.SCROLL_TO_BACK);
         }
     }
 
@@ -478,9 +499,6 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         final int oldScrollValue = getScrollY();
 
         if (oldScrollValue != newScrollValue) {
-            if (mCurrentState != State.SCROLL_TO_REFRESH) {
-                mCurrentState = State.AUTO_SCROLLING;
-            }
             if (null == mScrollAnimationInterpolator) {
                 // Default interpolator is a Decelerate Interpolator
                 mScrollAnimationInterpolator = new DecelerateInterpolator();
@@ -493,29 +511,30 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                 post(mCurrentSmoothScrollRunnable);
             }
         } else {
-            mCurrentState = State.RESET;
-            mReturningToStart = false;
+            mCurrentState = State.NONE;
         }
     }
 
-    private void moveHeader(int needToScrollValue) {
+    private void moveHeader(float needToScrollValue) {
         if (mCurrentMode == Mode.DISABLED || mCurrentMode == Mode.AUTO_LOAD || needToScrollValue > 0) {
+            Log.e(LOG_TAG, "moveHeader, return 1");
             return;
         }
         if (needToScrollValue == 0) {
             setBodyScroll(0);
+            Log.e(LOG_TAG, "moveHeader, return 2");
             return;
         }
 
-        int actualScrolledValue;
+        float actualScrolledValue;
         if (needToScrollValue < -mPullMaxDistance) {
             actualScrolledValue = -mPullMaxDistance;
         } else {
             actualScrolledValue = needToScrollValue;
         }
-
+        Log.e(LOG_TAG, "moveHeader, actualScrolledValue: " + actualScrolledValue);
         mCurrentState = State.MANUAL_SCROLLING;
-        setBodyScroll(actualScrolledValue);
+        setBodyScroll((int) actualScrolledValue);
 
         if (actualScrolledValue != 0 && !isRefreshing()) {
             mHeaderLayout.onPull(-needToScrollValue);
@@ -532,11 +551,12 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         if (needToScrollValue <= -mPullMaxDistance) {
             setState(State.SCROLL_TO_REFRESH);
         } else {
-            setState(State.RESET);
+            setState(State.SCROLL_TO_BACK);
         }
     }
 
     private void setBodyScroll(int value) {
+        Log.e(LOG_TAG, "setBodyScroll(" + value + ")");
         scrollTo(0, value);
         mHeaderLayout.setMargins(0, value, 0, 0);
         mHeaderLayout.setHeight(-value);
@@ -564,13 +584,18 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
         @Override
         public void run() {
+            Log.e(LOG_TAG, "SmoothScrollRunnable, run");
             /**
              * Only set mStartTime if this is the first time we're starting,
              * else actually calculate the Y delta
              */
             if (mStartTime == -1) {
                 mStartTime = System.currentTimeMillis();
+            } else if (mIsBeingDragged) {
+                Log.e(LOG_TAG, "SmoothScrollRunnable, return");
+                return;
             } else {
+                Log.e(LOG_TAG, "SmoothScrollRunnable, setBodyScroll");
                 /**
                  * We do do all calculations in long to reduce software float
                  * calculations. We use 1000 as it gives us good accuracy and
@@ -591,8 +616,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                 if (mCurrentLoadState == LoadState.AUTO_LOADING && (mMode == Mode.BOTH || mMode == Mode.PULL_TO_REFRESH)) {
                     mHeaderLayout.onRefreshCancel();
                 }
-                mCurrentState = State.RESET;
-                mReturningToStart = false;
+                mCurrentState = State.NONE;
                 if (null != mListener) {
                     mListener.onSmoothScrollFinished();
                 }
@@ -712,6 +736,11 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         if (mRefreshableView.getVisibility() == View.GONE) {
             return false;
         }
+
+        if (mCurrentState != State.NONE) {
+            return false;
+        }
+
         if (android.os.Build.VERSION.SDK_INT < 14) {
             if (mRefreshableView instanceof AbsListView) {
                 final AbsListView absListView = (AbsListView) mRefreshableView;
@@ -719,10 +748,10 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                         && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
                         .getTop() < absListView.getPaddingTop());
             } else {
-                return ViewCompat.canScrollVertically(mRefreshableView, -1) || mRefreshableView.getScrollY() > 0;
+                return mRefreshableView.canScrollVertically(-1) || mRefreshableView.getScrollY() > 0;
             }
         } else {
-            return ViewCompat.canScrollVertically(mRefreshableView, -1);
+            return mRefreshableView.canScrollVertically(-1);
         }
     }
 
@@ -758,7 +787,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         if (state instanceof Bundle) {
             Bundle bundle = (Bundle) state;
             mMode = Mode.mapIntToValue(bundle.getInt(STATE_MODE));
-            mIsDisable = bundle.getBoolean(STATE_ABLE);
+            mRefreshEnabled = bundle.getBoolean(STATE_ABLE);
             super.onRestoreInstanceState(bundle.getParcelable(STATE_SUPER));
             return;
         }
@@ -773,7 +802,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
         bundle.putInt(STATE_MODE, mMode.getIntValue());
-        bundle.putBoolean(STATE_ABLE, mIsDisable);
+        bundle.putBoolean(STATE_ABLE, mRefreshEnabled);
         bundle.putParcelable(STATE_SUPER, super.onSaveInstanceState());
         return bundle;
     }
@@ -836,13 +865,13 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     public enum State {
 
-        RESET(0x0),
+        NONE(0x1),
+
+        SCROLL_TO_BACK(0x3),
 
         AUTO_REFRESH(0x4),
 
         SCROLL_TO_REFRESH(0x5),
-
-        AUTO_SCROLLING(0x6),
 
         MANUAL_SCROLLING(0x7),
 
@@ -854,7 +883,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                     return value;
                 }
             }
-            return RESET;
+            return NONE;
         }
 
         private int mIntValue;
@@ -900,23 +929,20 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     protected void setState(State state) {
         switch (state) {
-            case AUTO_SCROLLING:
-            case RESET:
-                mCurrentState = State.AUTO_SCROLLING;
+            case SCROLL_TO_BACK:
                 onReset();
                 break;
             case SCROLL_TO_REFRESH:
                 mCurrentState = State.SCROLL_TO_REFRESH;
-                mReturningToStart = true;
                 smoothScrollTo(-mRefreshingDistance, mOnSmoothScrollFinishedListener);
                 break;
             case AUTO_REFRESH:
-                mCurrentState = State.AUTO_SCROLLING;
+                mCurrentState = State.SCROLL_TO_REFRESH;
                 smoothScrollTo(-mPullMaxDistance, 350, 0, new OnSmoothScrollFinishedListener() {
 
                     @Override
                     public void onSmoothScrollFinished() {
-                        mCurrentState = State.AUTO_SCROLLING;
+                        mCurrentState = State.SCROLL_TO_REFRESH;
                         postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -927,6 +953,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                 });
                 break;
             case REFRESHING:
+                mIsBeingDragged = false;
                 mCurrentState = State.REFRESHING;
                 break;
         }
@@ -952,7 +979,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     protected void onReset() {
         mIsBeingDragged = false;
-        mReturningToStart = true;
+        mCurrentState = State.SCROLL_TO_BACK;
+        mActivePointerId = INVALID_POINTER;
         smoothScrollTo(0);
     }
 
@@ -969,11 +997,16 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
     }
 
     public void onRefreshComplete(boolean loadable) {
+        mRefreshing = false;
         setLoadState(loadable);
+
+        if (mCurrentState == State.MANUAL_SCROLLING) {
+            return;
+        }
         if (mHeaderLayout != null) {
             mHeaderLayout.onRefreshFinish();
         }
-        setState(State.AUTO_SCROLLING);
+        setState(State.SCROLL_TO_BACK);
         checkBody();
     }
 
@@ -1068,7 +1101,19 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     @Override
     public boolean onStartNestedScroll(View child, View target, int nestedScrollAxes) {
-        return isEnabled() && !mIsDisable && !mReturningToStart && !isRefreshing() && (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
+        boolean result = isEnabled() && mRefreshEnabled && (nestedScrollAxes & ViewCompat.SCROLL_AXIS_VERTICAL) != 0;
+        if (result) {
+//            if(mCurrentState == State.REFRESHING) {
+//                Log.e(LOG_TAG, "onStartNestedScroll: is refreshing");
+//                return false;
+//            }
+            if(!mRefreshableView.canScrollVertically(1)) {
+                Log.e(LOG_TAG, "onStartNestedScroll, canScrollDown: " + false);
+                return false;
+            }
+        }
+        Log.e(LOG_TAG, "onStartNestedScroll: " + result);
+        return result;
     }
 
     @Override
@@ -1077,12 +1122,14 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         mNestedScrollingParentHelper.onNestedScrollAccepted(child, target, axes);
         // Dispatch up to the nested parent
         startNestedScroll(axes & ViewCompat.SCROLL_AXIS_VERTICAL);
-        mTotalUnconsumed = 0;
+        mTotalUnconsumed = mCurrentState == State.REFRESHING ? - mRefreshingDistance / DRAG_RATE : 0;
+        Log.e(LOG_TAG, "onNestedScrollAccepted, mTotalUnconsumed: " + mTotalUnconsumed);
         mNestedScrollInProgress = true;
     }
 
     @Override
     public void onNestedPreScroll(View target, int dx, int dy, int[] consumed) {
+        Log.e(LOG_TAG, "onNestedPreScroll, mTotalUnconsumed: " + mTotalUnconsumed + ", dy: " + dy);
         // If we are in the middle of consuming, a scroll, then we want to move the spinner back up
         // before allowing the list to scroll
         if (dy > 0) {
@@ -1103,7 +1150,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
                     consumed[1] = dy;
                 }
             }
-            moveHeader((int) (mTotalUnconsumed * DRAG_RATE));
+            Log.e(LOG_TAG, "onNestedPreScroll, moveHeader: " + mTotalUnconsumed * DRAG_RATE);
+            moveHeader(mTotalUnconsumed * DRAG_RATE);
         }
 
         // Now let our nested parent consume the leftovers
@@ -1121,12 +1169,13 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     @Override
     public void onStopNestedScroll(View target) {
+        Log.e(LOG_TAG, "onStopNestedScroll");
         mNestedScrollingParentHelper.onStopNestedScroll(target);
         mNestedScrollInProgress = false;
 
         // Finish the spinner for nested scrolling if we ever consumed any
         // unconsumed nested scroll
-        if (mTotalUnconsumed != 0) {
+        if (mTotalUnconsumed != 0 && mCurrentState != State.REFRESHING) {
             finishHeader(mTotalUnconsumed * DRAG_RATE);
             mTotalUnconsumed = 0;
         }
@@ -1136,6 +1185,7 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     @Override
     public void onNestedScroll(final View target, final int dxConsumed, final int dyConsumed, final int dxUnconsumed, final int dyUnconsumed) {
+        Log.e(LOG_TAG, "onNestedScroll: " + dxConsumed + ", " + dyConsumed + ", " + dxUnconsumed + ", " + dyUnconsumed);
         // Dispatch up to the nested parent first
         dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, mParentOffsetInWindow);
 
@@ -1147,7 +1197,8 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
         final int dy = dyUnconsumed + mParentOffsetInWindow[1];
         if (!canChildScrollUp()) {
             mTotalUnconsumed += dy;
-            moveHeader((int) (mTotalUnconsumed * DRAG_RATE));
+            Log.e(LOG_TAG, "onNestedScroll, moveHeader: " + mTotalUnconsumed * DRAG_RATE);
+            moveHeader(mTotalUnconsumed * DRAG_RATE);
         }
     }
 
@@ -1155,57 +1206,76 @@ public abstract class RefreshNestedLayout<T extends View> extends FrameLayout im
 
     @Override
     public void setNestedScrollingEnabled(boolean enabled) {
+        Log.e(LOG_TAG, "setNestedScrollingEnabled: " + enabled);
         mNestedScrollingChildHelper.setNestedScrollingEnabled(enabled);
     }
 
     @Override
     public boolean isNestedScrollingEnabled() {
-        return mNestedScrollingChildHelper.isNestedScrollingEnabled();
+        boolean result = mNestedScrollingChildHelper.isNestedScrollingEnabled();
+        Log.e(LOG_TAG, "isNestedScrollingEnabled: " + result);
+        return result;
     }
 
     @Override
     public boolean startNestedScroll(int axes) {
-        return mNestedScrollingChildHelper.startNestedScroll(axes);
+        boolean result = mNestedScrollingChildHelper.startNestedScroll(axes);
+        Log.e(LOG_TAG, "startNestedScroll: " + axes + ", result = " + result);
+        return result;
     }
 
     @Override
     public void stopNestedScroll() {
+        Log.e(LOG_TAG, "stopNestedScroll");
         mNestedScrollingChildHelper.stopNestedScroll();
     }
 
     @Override
     public boolean hasNestedScrollingParent() {
-        return mNestedScrollingChildHelper.hasNestedScrollingParent();
+        boolean result = mNestedScrollingChildHelper.hasNestedScrollingParent();
+        Log.e(LOG_TAG, "hasNestedScrollingParent: " + result);
+        return result;
     }
 
     @Override
     public boolean dispatchNestedScroll(int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int[] offsetInWindow) {
+        Log.e(LOG_TAG, "dispatchNestedScroll: " + dxConsumed + ", " + dyConsumed + ", " + dxUnconsumed + ", " + dyUnconsumed + ", " + Arrays.toString(offsetInWindow));
         return mNestedScrollingChildHelper.dispatchNestedScroll(dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, offsetInWindow);
     }
 
     @Override
     public boolean dispatchNestedPreScroll(int dx, int dy, int[] consumed, int[] offsetInWindow) {
-        return mNestedScrollingChildHelper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow);
+        boolean result = mNestedScrollingChildHelper.dispatchNestedPreScroll(dx, dy, consumed, offsetInWindow);
+        Log.e(LOG_TAG, "dispatchNestedPreScroll: " + dx + ", " + dy + ", " + Arrays.toString(consumed) + ", " + Arrays.toString(offsetInWindow) + ", result = " + result);
+        return result;
     }
 
     @Override
     public boolean onNestedPreFling(View target, float velocityX, float velocityY) {
-        return dispatchNestedPreFling(velocityX, velocityY);
+        boolean result = dispatchNestedPreFling(velocityX, velocityY);
+        Log.e(LOG_TAG, "onNestedPreFling: " + velocityX + ", " + velocityY + ", result = " + result);
+        return result;
     }
 
     @Override
     public boolean onNestedFling(View target, float velocityX, float velocityY, boolean consumed) {
-        return dispatchNestedFling(velocityX, velocityY, consumed);
+        boolean result = dispatchNestedFling(velocityX, velocityY, consumed);
+        Log.e(LOG_TAG, "onNestedFling: " + velocityX + ", " + velocityY + ", " + consumed + ", result = " + result);
+        return result;
     }
 
     @Override
     public boolean dispatchNestedFling(float velocityX, float velocityY, boolean consumed) {
-        return mNestedScrollingChildHelper.dispatchNestedFling(velocityX, velocityY, consumed);
+        boolean result = mNestedScrollingChildHelper.dispatchNestedFling(velocityX, velocityY, consumed);
+        Log.e(LOG_TAG, "dispatchNestedFling: " + velocityX + ", " + velocityY + ", " + consumed + ", result = " + result);
+        return result;
     }
 
     @Override
     public boolean dispatchNestedPreFling(float velocityX, float velocityY) {
-        return mNestedScrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY);
+        boolean result = mNestedScrollingChildHelper.dispatchNestedPreFling(velocityX, velocityY);
+        Log.e(LOG_TAG, "dispatchNestedPreFling: " + velocityX + ", " + velocityY + ", result = " + result);
+        return result;
     }
 
 }

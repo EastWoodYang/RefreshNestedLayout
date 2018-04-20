@@ -107,7 +107,7 @@ public class RefreshNestedListViewLayout extends RefreshNestedLayout<RefreshList
                     mOriginalScrollListener.onScroll(view, firstVisibleItem, visibleItemCount, totalItemCount);
                 }
                 if (mCurrentLoadState != LoadState.AUTO_LOADING && (firstVisibleItem + visibleItemCount >= totalItemCount) &&
-                        (mCurrentState == State.RESET || mCurrentState == State.AUTO_SCROLLING || mCurrentState == State.SCROLL_TO_REFRESH ||
+                        (mCurrentState == State.NONE || mCurrentState == State.SCROLL_TO_REFRESH ||
                                 mCurrentLoadState == LoadState.LOADING_ERROR || mCurrentLoadState == LoadState.LOADING_END)) {
                     if (mOnAutoLoadListener != null && getAutoLoadUsable()) {
                         if (!isManualLoad()) {

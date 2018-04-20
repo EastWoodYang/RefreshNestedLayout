@@ -31,9 +31,6 @@ public class RefreshListView extends ObservableListView {
     public RefreshListView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setOverScrollMode(OVER_SCROLL_NEVER);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            setNestedScrollingEnabled(true);
-        }
     }
 
 }

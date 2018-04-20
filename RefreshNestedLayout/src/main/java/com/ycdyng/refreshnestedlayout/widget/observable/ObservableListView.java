@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.View;
@@ -100,100 +101,101 @@ public class ObservableListView extends ListView {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mCallbacks != null) {
-            switch (ev.getActionMasked()) {
-                case MotionEvent.ACTION_DOWN:
-                    // Whether or not motion events are consumed by children,
-                    // flag initializations which are related to ACTION_DOWN events should be executed.
-                    // Because if the ACTION_DOWN is consumed by children and only ACTION_MOVEs are
-                    // passed to parent (this view), the flags will be invalid.
-                    // Also, applications might implement initialization codes to onDownMotionEvent,
-                    // so call it here.
-                    mFirstScroll = mDragging = true;
-                    mCallbacks.onDownMotionEvent();
-                    break;
-            }
-        }
+//        if (mCallbacks != null) {
+//            switch (ev.getActionMasked()) {
+//                case MotionEvent.ACTION_DOWN:
+//                    // Whether or not motion events are consumed by children,
+//                    // flag initializations which are related to ACTION_DOWN events should be executed.
+//                    // Because if the ACTION_DOWN is consumed by children and only ACTION_MOVEs are
+//                    // passed to parent (this view), the flags will be invalid.
+//                    // Also, applications might implement initialization codes to onDownMotionEvent,
+//                    // so call it here.
+//                    mFirstScroll = mDragging = true;
+//                    mCallbacks.onDownMotionEvent();
+//                    break;
+//            }
+//        }
         return super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        // when drag in blank area of ListView, return true to trigger pull-to-refresh action
-        if(Build.VERSION.SDK_INT >= 21) {
-            int position = pointToPosition((int)ev.getX(), (int)ev.getY());
-            if(INVALID_POSITION == position) {
-                return true;
-            }
-        }
-
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                break;
-
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                mIntercepted = false;
-                mDragging = false;
-                if (mCallbacks != null) {
-                    mCallbacks.onUpOrCancelMotionEvent(mScrollState);
-                }
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                if (mPrevMoveEvent == null) {
-                    mPrevMoveEvent = ev;
-                }
-                float diffY = ev.getY() - mPrevMoveEvent.getY();
-                mPrevMoveEvent = MotionEvent.obtainNoHistory(ev);
-                if (isFirstItemVisible() && isLastItemVisible()) {
-
-                } else if (diffY >= 0 && isFirstItemVisible()) {
-                    if (mIntercepted) {
-                        return false;
-                    }
-
-                    final ViewGroup parent = (ViewGroup) getParent();
-                    // Get offset to parents. If the parent is not the direct parent,
-                    // we should aggregate offsets from all of the parents.
-                    float offsetX = 0;
-                    float offsetY = 0;
-                    for (View v = this; v != null && v != parent; ) {
-                        offsetX += v.getLeft() - v.getScrollX();
-                        offsetY += v.getTop() - v.getScrollY();
-                        try {
-                            v = (View) v.getParent();
-                        } catch (ClassCastException ex) {
-                            break;
-                        }
-                    }
-                    final MotionEvent event = MotionEvent.obtainNoHistory(ev);
-                    event.offsetLocation(offsetX, offsetY);
-                    if (parent.onInterceptTouchEvent(event)) {
-                        mIntercepted = true;
-
-                        // If the parent wants to intercept ACTION_MOVE events,
-                        // we pass ACTION_DOWN event to the parent
-                        // as if these touch events just have began now.
-                        event.setAction(MotionEvent.ACTION_DOWN);
-
-                        // Return this onTouchEvent() first and set ACTION_DOWN event for parent
-                        // to the queue, to keep events sequence.
-                        post(new Runnable() {
-                            @Override
-                            public void run() {
-                                parent.dispatchTouchEvent(event);
-                            }
-                        });
-                        return false;
-                    }
-                    // Even when this can't be scrolled anymore,
-                    // simply returning false here may cause subView's click,
-                    // so delegate it to super.
-                    return super.onTouchEvent(ev);
-                }
-                break;
-        }
+//        Log.e("RefreshNestedListViewLayout", "onTouchEvent");
+//        // when drag in blank area of ListView, return true to trigger pull-to-refresh action
+//        if(Build.VERSION.SDK_INT >= 21) {
+//            int position = pointToPosition((int)ev.getX(), (int)ev.getY());
+//            if(INVALID_POSITION == position) {
+//                return true;
+//            }
+//        }
+//
+//        switch (ev.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                break;
+//
+//            case MotionEvent.ACTION_UP:
+//            case MotionEvent.ACTION_CANCEL:
+//                mIntercepted = false;
+//                mDragging = false;
+//                if (mCallbacks != null) {
+//                    mCallbacks.onUpOrCancelMotionEvent(mScrollState);
+//                }
+//                break;
+//
+//            case MotionEvent.ACTION_MOVE:
+//                if (mPrevMoveEvent == null) {
+//                    mPrevMoveEvent = ev;
+//                }
+//                float diffY = ev.getY() - mPrevMoveEvent.getY();
+//                mPrevMoveEvent = MotionEvent.obtainNoHistory(ev);
+//                if (isFirstItemVisible() && isLastItemVisible()) {
+//
+//                } else if (diffY >= 0 && isFirstItemVisible()) {
+//                    if (mIntercepted) {
+//                        return false;
+//                    }
+//
+//                    final ViewGroup parent = (ViewGroup) getParent();
+//                    // Get offset to parents. If the parent is not the direct parent,
+//                    // we should aggregate offsets from all of the parents.
+//                    float offsetX = 0;
+//                    float offsetY = 0;
+//                    for (View v = this; v != null && v != parent; ) {
+//                        offsetX += v.getLeft() - v.getScrollX();
+//                        offsetY += v.getTop() - v.getScrollY();
+//                        try {
+//                            v = (View) v.getParent();
+//                        } catch (ClassCastException ex) {
+//                            break;
+//                        }
+//                    }
+//                    final MotionEvent event = MotionEvent.obtainNoHistory(ev);
+//                    event.offsetLocation(offsetX, offsetY);
+//                    if (parent.onInterceptTouchEvent(event)) {
+//                        mIntercepted = true;
+//
+//                        // If the parent wants to intercept ACTION_MOVE events,
+//                        // we pass ACTION_DOWN event to the parent
+//                        // as if these touch events just have began now.
+//                        event.setAction(MotionEvent.ACTION_DOWN);
+//
+//                        // Return this onTouchEvent() first and set ACTION_DOWN event for parent
+//                        // to the queue, to keep events sequence.
+//                        post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                parent.dispatchTouchEvent(event);
+//                            }
+//                        });
+//                        return false;
+//                    }
+//                    // Even when this can't be scrolled anymore,
+//                    // simply returning false here may cause subView's click,
+//                    // so delegate it to super.
+//                    return super.onTouchEvent(ev);
+//                }
+//                break;
+//        }
         return super.onTouchEvent(ev);
     }
 

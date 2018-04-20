@@ -17,7 +17,9 @@
 package com.ycdyng.refreshnestedlayouttrial;
 
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.ListView;
 
 import com.ycdyng.refreshnestedlayout.RefreshNestedListViewLayout;
 import com.ycdyng.refreshnestedlayout.kernel.RefreshNestedLayout;
@@ -26,9 +28,10 @@ import com.ycdyng.refreshnestedlayout.widget.adapter.QuickAdapter;
 
 import java.util.ArrayList;
 
-public class SampleListViewPullToRefresh extends AppCompatActivity {
+public class SampleListViewSwipeLayout extends AppCompatActivity {
 
-    private RefreshNestedListViewLayout mRefresher;
+    private SwipeRefreshLayout mRefresher;
+    private ListView mListView;
 
     private QuickAdapter<SampleModel> mQuickAdapter;
     private ArrayList<SampleModel> mDataList = new ArrayList<SampleModel>();
@@ -50,11 +53,11 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
             }
         };
 
-        setContentView(R.layout.sample_list_view);
-        mRefresher = (RefreshNestedListViewLayout) findViewById(R.id.refresh_layout);
-        mRefresher.setAdapter(mQuickAdapter);
-        mRefresher.setOnRefreshListener(new RefreshNestedLayout.OnRefreshListener() {
-
+        setContentView(R.layout.sample_list_view_swipe);
+        mRefresher = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        mListView = (ListView) findViewById(R.id.list_view);
+        mListView.setAdapter(mQuickAdapter);
+        mRefresher.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 handleRefreshingEvent();
@@ -74,7 +77,7 @@ public class SampleListViewPullToRefresh extends AppCompatActivity {
                 }
 
                 mQuickAdapter.notifyDataSetChanged();
-                mRefresher.onRefreshComplete();
+                mRefresher.setRefreshing(false);
             }
         }, 8000);
     }

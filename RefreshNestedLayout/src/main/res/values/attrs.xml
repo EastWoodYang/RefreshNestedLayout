@@ -17,7 +17,7 @@
         <attr name="dividerHeight" format="dimension"/>
         <attr name="dividerColor" format="reference|color"/>
 
-        <attr name="disableScrollWhenRefreshing" format="boolean"/>
+        <attr name="scrollWhenRefreshingEnabled" format="boolean"/>
 
         <attr name="emptyLayout" format="reference"/>
         <attr name="loadingLayout" format="reference"/>
