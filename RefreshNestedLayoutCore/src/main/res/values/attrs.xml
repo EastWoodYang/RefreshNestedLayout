@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RefreshNestedLayout">
+        <attr name="mode">
+            <flag name="both" value="0x0" />
+            <flag name="pullToRefresh" value="0x1" />
+            <flag name="autoLoad" value="0x2" />
+            <flag name="disable" value="0x3" />
+        </attr>
+
+        <attr name="pullMaxDistance" format="dimension" />
+
+        <attr name="refreshingDistance" format="dimension" />
+
+        <attr name="disableDivider" format="boolean" />
+        <attr name="dividerHeight" format="dimension" />
+        <attr name="dividerColor" format="reference|color" />
+
+        <attr name="scrollWhenRefreshingEnabled" format="boolean" />
+
+        <attr name="emptyLayout" format="reference" />
+        <attr name="loadingLayout" format="reference" />
+
+        <attr name="autoLoadLayout" format="reference" />
+        <attr name="clickableLayout" format="reference" />
+        <attr name="loadEndLayout" format="reference" />
+        <attr name="loadErrorLayout" format="reference" />
+
+        <attr name="crossFading" format="boolean" />
+    </declare-styleable>
+
+</resources>
