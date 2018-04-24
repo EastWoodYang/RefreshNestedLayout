@@ -28,3 +28,11 @@ dependencies {
 
 //    api project(":HandyAdapter")
 }
+
+apply from: 'http://android.yingyinglicai.net/upload.gradle'
+
+uploadNexus({
+    groupId = 'com.winwin.common'
+    artifactId = 'nested-refresh-layout'
+    version = '1.0.1-SNAPSHOT'
+})

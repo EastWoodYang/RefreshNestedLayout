@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/RefreshNestedLayout" />
+            <option value="$PROJECT_DIR$/RefreshNestedLayoutCore" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
