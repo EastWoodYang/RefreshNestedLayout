@@ -6,6 +6,9 @@ The RefreshNestedLayout should be used whenever the user can refresh the content
 * Work well with ListView, RecycleView and ScrollView ... 
 * Compatible with **CoordinatorLayout**
 
+<img src='https://github.com/EastWoodYang/MicroModule/blob/master/picture/1.png' height='350'/>
+
+
 ## Get it
 RefreshNestedLayout is now available on JCentral.
 
