@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">RefreshNestedLayout</string>
+
+    <string name="pull_to_refresh">PULL TO REFRESH</string>
+    <string name="release_to_refresh">RELEASE TO REFRESH</string>
+    <string name="refreshing">REFRESHING DATA</string>
+
+    <string name="custom_header">com.eastwood.demo.CustomHeaderLayout</string>
+
+</resources>

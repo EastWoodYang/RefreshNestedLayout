@@ -3,9 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/RefreshNestedLayout/RefreshNestedLayout.iml" filepath="$PROJECT_DIR$/RefreshNestedLayout/RefreshNestedLayout.iml" />
-      <module fileurl="file://$PROJECT_DIR$/RefreshNestedLayoutCore/RefreshNestedLayoutCore.iml" filepath="$PROJECT_DIR$/RefreshNestedLayoutCore/RefreshNestedLayoutCore.iml" />
       <module fileurl="file://$PROJECT_DIR$/RefreshNestedLayoutTrial.iml" filepath="$PROJECT_DIR$/RefreshNestedLayoutTrial.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
     </modules>
   </component>
 </project>

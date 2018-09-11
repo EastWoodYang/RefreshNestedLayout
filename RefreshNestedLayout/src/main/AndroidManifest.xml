@@ -1,6 +1,6 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ycdyng.refreshnestedlayout">
+    package="com.eastwood.common.view">
 
     <application
         android:allowBackup="true"

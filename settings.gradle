@@ -1,1 +1,1 @@
-include ':app', ':RefreshNestedLayout', ':RefreshNestedLayoutCore'//, ':HandyAdapter'
+include ':RefreshNestedLayout', ':demo'
