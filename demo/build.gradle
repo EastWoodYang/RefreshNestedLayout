@@ -24,7 +24,7 @@ android {
 dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
-    implementation project(':RefreshNestedLayout')
+    implementation project(':RefreshNestedLayout') // 'com.eastwood.common.view:refresh-nested-layout:1.0.0'
 
     implementation 'com.eastwood.common:auto-quick-adapter:1.0.3'
 }
